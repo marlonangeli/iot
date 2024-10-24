@@ -1,0 +1,53 @@
+name: iot-development
+
+services:
+  logi-api:
+    container_name: logi-api-dev
+    build:
+      context: logi-api/
+      dockerfile: Dockerfile
+    env_file:
+      - development.env
+    ports:
+      - "8080:8080"
+
+  postgres:
+    container_name: iot-postgres
+    image: postgres:16
+    env_file:
+      - development.env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  mongodb:
+    container_name: iot-mongodb
+    image: mongo:5
+    ports:
+      - "27017:27017"
+    env_file:
+      - development.env
+    volumes:
+      - mongodb-data:/data/db
+
+  rabbitmq:
+    container_name: iot-rabbitmq
+    image: rabbitmq:3
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - development.env
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  postgres-data:
+    name: iot-postgres-data
+  mongodb-data:
+    name: iot-mongodb-data
+  rabbitmq-data:
+    name: iot-rabbitmq-data
+
+networks:
+  default:
+    name: iot-development-network
