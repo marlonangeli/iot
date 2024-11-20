@@ -1,0 +1,17 @@
+### GET /devices
+GET {{API_URL}}/devices
+
+
+### POST /devices
+POST {{API_URL}}/devices
+Content-Type: application/json
+
+{
+    "name": "device-xyz",
+    "type": "METRIC",
+    "status": "ACTIVE"
+}
+
+### DELETE /devices/1
+@id = 1
+DELETE {{API_URL}}/devices/{{id}}

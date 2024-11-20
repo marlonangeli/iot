@@ -1,4 +1,4 @@
-package iot.logi.api.endpoints;
+package iot.logi.api.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +19,21 @@ public class StatusController {
 
     private static final Logger log = LoggerFactory.getLogger(StatusController.class);
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
+    private final JdbcTemplate jdbcTemplate;
     private RabbitTemplate rabbitTemplate;
 
     @Value("${spring.application.version}")
     private String version;
+
+    public StatusController(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Autowired
+    public StatusController(JdbcTemplate jdbcTemplate, RabbitTemplate rabbitTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.rabbitTemplate = rabbitTemplate;
+    }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)

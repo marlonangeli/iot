@@ -4,11 +4,13 @@ import iot.logi.api.models.enums.LocationType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "locations")
 public class Location {
@@ -28,4 +30,7 @@ public class Location {
 
     @Column(name = "type", nullable = false)
     private LocationType type;
+
+    @OneToMany(mappedBy = "location")
+    private List<Device> devices;
 }

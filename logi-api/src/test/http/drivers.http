@@ -7,5 +7,5 @@ POST {{API_URL}}/drivers
 Content-Type: application/json
 
 {
-  "name": "Elon Musk"
+    "name": "Elon Musk"
 }
