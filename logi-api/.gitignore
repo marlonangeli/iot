@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# New Relic
+/newrelic/
+!/newrelic/newrelic.yml
+!/newrelic/newrelic.jar

@@ -8,4 +8,14 @@ WORKDIR /app
 COPY --from=build /app/target/logi-*.jar logi-api.jar
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "logi-api.jar"]
+# New Relic
+COPY --from=build /app/newrelic/newrelic.jar newrelic.jar
+COPY --from=build /app/newrelic/newrelic.yml newrelic.yml
+ARG NEW_RELIC_LICENSE_KEY
+ENV NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY
+RUN sed -i "s/license_key: .*/license_key: '${NEW_RELIC_LICENSE_KEY}'/" newrelic.yml
+
+ARG COMMIT_HASH
+ENV COMMIT_HASH=$COMMIT_HASH
+
+ENTRYPOINT ["java", "-javaagent:newrelic.jar", "-jar", "logi-api.jar"]
