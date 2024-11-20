@@ -44,23 +44,24 @@ public class StatusController {
 
         StatusVersion messageBrokerStatus;
         try {
-            var messageBrokerVersion = rabbitTemplate.execute(channel ->
-                    channel.getConnection().getServerProperties().get("version").toString());
+            var messageBrokerVersion = rabbitTemplate.execute(channel -> channel.getConnection().getServerProperties().get("version").toString());
             messageBrokerStatus = new StatusVersion("OK", messageBrokerVersion);
         } catch (Exception e) {
             messageBrokerStatus = new StatusVersion("ERROR", null);
             log.error("Error getting message broker version", e);
             hasError = true;
         }
-        var commitHash = System.getenv("COMMIT_HASH") == null ?
-                "local-version" : System.getenv("COMMIT_HASH");
+        var commitHash = System.getenv("COMMIT_HASH") == null ? "local-version" : System.getenv("COMMIT_HASH");
 
-        var status = new StatusResponse(
-                !hasError ? "OK" : "WARNING", databaseStatus, messageBrokerStatus, commitHash, version);
+        var status = new StatusResponse(!hasError ? "OK" : "WARNING", databaseStatus, messageBrokerStatus, commitHash, version);
 
         return ResponseEntity.ok(status);
     }
 }
 
-record StatusResponse(String status, StatusVersion database, StatusVersion messageBroker, String commitHash, String apiVersion) {}
-record StatusVersion(String status, String version) {}
+record StatusResponse(String status, StatusVersion database, StatusVersion messageBroker, String commitHash,
+                      String apiVersion) {
+}
+
+record StatusVersion(String status, String version) {
+}

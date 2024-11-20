@@ -1,0 +1,11 @@
+### GET /drivers
+GET {{API_URL}}/drivers
+
+
+### POST /drivers
+POST {{API_URL}}/drivers
+Content-Type: application/json
+
+{
+  "name": "Elon Musk"
+}
