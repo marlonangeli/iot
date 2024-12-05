@@ -1,0 +1,23 @@
+{
+  "name": "event-api",
+  "version": "1.0.0",
+  "description": "Event API - IoT",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marlonangeli/iot.git"
+  },
+  "private": true,
+  "dependencies": {
+    "amqplib": "^0.10.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.1",
+    "jest": "^29.7.0",
+    "mongoose": "^8.8.3"
+  }
+}
