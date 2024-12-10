@@ -1,10 +1,10 @@
 echo 'Creating application user and db'
 
-mongosh ${MONGO_INITDB_DATABASE} \
+mongosh ${DB_NAME} \
   --host localhost \
-  --port ${MONGO_PORT} \
+  --port ${DB_PORT} \
   -u ${MONGO_INITDB_ROOT_USERNAME} \
   -p ${MONGO_INITDB_ROOT_PASSWORD} \
   --authenticationDatabase admin \
-  --eval "db.createUser({user: '${MONGO_INITDB_ROOT_USERNAME}', pwd: '${MONGO_INITDB_ROOT_PASSWORD}', roles:[{role:'dbOwner', db: '${MONGO_INITDB_DATABASE}'}]});"
+  --eval "db.createUser({user: '${DB_USER}', pwd: '${DB_PASSWORD}', roles:[{role:'dbOwner', db: '${DB_NAME}'}]});"
   

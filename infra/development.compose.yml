@@ -32,6 +32,7 @@ services:
       - development.env
     environment:
       NODE_ENV: development
+      NEW_RELIC_APP_NAME: "event-api (dev)"
     ports:
       - "3000:3000"
     depends_on:
@@ -42,7 +43,7 @@ services:
 
   postgres:
     container_name: iot-postgres
-    image: postgres:16
+    image: postgres:15.6
     ports:
       - "5432:5432"
     environment:
@@ -59,19 +60,21 @@ services:
 
   mongodb:
     container_name: iot-mongodb
-    image: mongo:5
+    image: mongo:8.0.3
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
-      MONGO_PORT: ${MONGO_PORT}
+      DB_NAME: ${MONGO_DATABASE}
+      DB_USER: ${MONGO_USER}
+      DB_PASSWORD: ${MONGO_PASSWORD}
+      DB_PORT: ${MONGO_PORT}
     volumes:
       - mongodb-data:/data/db
       - ./mongo-entrypoint.sh:/docker-entrypoint-initdb.d/mongo-entrypoint.sh:ro
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@localhost:${MONGO_PORT}/?authSource=${MONGO_INITDB_DATABASE} --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@localhost:27017/?authSource=admin --quiet
       interval: 30s
       timeout: 10s
       retries: 5

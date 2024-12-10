@@ -1,15 +1,13 @@
 import mongoose from 'mongoose';
 import env from './env.js';
 
-const { MONGO_HOST, MONGO_PORT, MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD, MONGO_INITDB_DATABASE } = env();
+const { MONGO_HOST, MONGO_PORT, MONGO_USER, MONGO_PASSWORD, MONGO_DATABASE } = env;
 
 const connectMongo = async () => {
     try {
-
-        const uri = `mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_INITDB_DATABASE}`;
+        const uri = formatUri();
 
         await mongoose.connect(uri);
-        console.log('Connection with MongoDB established');
     } catch (error) {
         console.error('Error on connect with MongoDB:', error.message);
     }
@@ -18,7 +16,6 @@ const connectMongo = async () => {
 const disconnectMongo = async () => {
     try {
         await mongoose.disconnect();
-        console.log('Disconnected from MongoDB');
     } catch (error) {
         console.error('Error on disconnect from MongoDB:', error.message);
     }
@@ -38,6 +35,14 @@ const insertMongo = async (model, data) => {
     } catch (error) {
         console.error('Error on insert MongoDB:', error.message);
     }
+}
+
+function formatUri() {
+    if (env.NODE_ENV === 'production') {
+        return `mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}/?retryWrites=true&w=majority&appName=${MONGO_DATABASE}`;
+    }
+
+    return `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DATABASE}`;
 }
 
 const mongo = {

@@ -2,12 +2,13 @@ import {z} from 'zod';
 import {configDotenv} from "dotenv";
 
 const envSchema = z.object({
-    DOCKER: z.boolean().optional(),
+    DOCKER: z.any().optional(),
     NODE_ENV: z.string().min(1, 'Node environment is required'),
+    COMMIT_HASH: z.string().optional(),
 
-    MONGO_INITDB_ROOT_USERNAME: z.string().min(1, 'MongoDB user is required'),
-    MONGO_INITDB_ROOT_PASSWORD: z.string().min(1, 'MongoDB password is required'),
-    MONGO_INITDB_DATABASE: z.string().min(1, 'Database name is required'),
+    MONGO_USER: z.string().min(1, 'MongoDB user is required'),
+    MONGO_PASSWORD: z.string().min(1, 'MongoDB password is required'),
+    MONGO_DATABASE: z.string().optional().or(z.string().min(1, 'MongoDB database is required')),
     MONGO_HOST: z.string().min(1, 'MongoDB host is required'),
     MONGO_PORT: z.string().regex(/^\d+$/, 'MongoDB port must be a valid number'),
 
@@ -21,7 +22,7 @@ const envSchema = z.object({
     NEW_RELIC_USER_KEY: z.string().optional()
 });
 
-function env() {
+function configure() {
     try {
         configDotenv();
 
@@ -30,6 +31,7 @@ function env() {
         if (!env.DOCKER) {
             env.MONGO_HOST = 'localhost';
             env.RABBITMQ_HOST = 'localhost';
+            env.COMMIT_HASH = 'development';
         }
 
         return env;
@@ -45,5 +47,7 @@ function env() {
         throw error;
     }
 }
+
+const env = configure();
 
 export default env;
