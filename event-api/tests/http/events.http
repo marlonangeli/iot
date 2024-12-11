@@ -1,0 +1,13 @@
+### GET events
+GET {{API_URL}}/events
+
+### POST event
+POST {{API_URL}}/events
+Content-Type: application/json
+
+{
+  "deviceId": "iot-sobjak",
+  "eventType": "temperature",
+  "value": 23.5,
+  "caraio": "caraio"
+}

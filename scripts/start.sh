@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change to project root directory
-cd "$(dirname "$(readlink -f "$0")")/.."
+cd "$(dirname "$(readlink -f "$0")")/../infra"
 
 # Function to display correct script usage
 show_usage() {
