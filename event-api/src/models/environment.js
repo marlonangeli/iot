@@ -55,4 +55,4 @@ const environmentSchema = new mongoose.Schema({
 
 const Environment = mongoose.model('Environment', environmentSchema)
 
-module.exports = Environment;
+export default Environment;

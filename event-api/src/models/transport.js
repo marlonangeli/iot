@@ -66,4 +66,4 @@ const TransportTrackingSchema = new mongoose.Schema({
 
 const Transport = mongoose.model('Transport', TransportTrackingSchema);
 
-module.exports = Transport;
+export default Transport;

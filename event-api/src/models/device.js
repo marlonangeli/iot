@@ -4,7 +4,6 @@ const deviceSchema = new mongoose.Schema({
     deviceId: {
         type: String,
         required: true,
-        unique: true,
         trim: true
     },
     deviceType: {
@@ -55,4 +54,4 @@ const deviceSchema = new mongoose.Schema({
 
 const Device = mongoose.model('Device', deviceSchema);
 
-module.exports = Device;
+export default Device;
