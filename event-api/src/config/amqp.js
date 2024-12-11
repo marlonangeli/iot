@@ -4,132 +4,102 @@ import env from './env.js';
 
 class RabbitMQHandler {
     constructor() {
+        const connectionUrl = env.NODE_ENV === 'production'
+            ? `amqps://${env.RABBITMQ_USER}:${env.RABBITMQ_PASS}@${env.RABBITMQ_HOST}/${env.RABBITMQ_VHOST}`
+            : `amqp://${env.RABBITMQ_USER}:${env.RABBITMQ_PASS}@${env.RABBITMQ_HOST}:${env.RABBITMQ_PORT}/${env.RABBITMQ_VHOST}`;
+
         this.config = {
-            user: env.RABBITMQ_USER,
-            pass: env.RABBITMQ_PASS,
-            host: env.RABBITMQ_HOST,
-            port: env.RABBITMQ_PORT,
-            vhost: env.RABBITMQ_VHOST
+            url: connectionUrl,
+            reconnectDelay: 5000,
         };
         this.connection = null;
-        this.channels = new Map();
-    }
-
-    _getConnectionUri() {
-        return process.env.NODE_ENV === 'production'
-            ? `amqps://${this.config.user}:${this.config.pass}@${this.config.host}/${this.config.vhost}`
-            : `amqp://${this.config.user}:${this.config.pass}@${this.config.host}:${this.config.port}/${this.config.vhost}`;
+        this.channel = null;
     }
 
     async connect() {
-        if (this.connection) return this.connection;
-
         try {
-            this.connection = await amqp.connect(this._getConnectionUri());
-            return this.connection;
-        } catch (error) {
-            console.error('RabbitMQ Connection Error:', error);
-            await this.close();
-            throw error;
+            if (this.connection) return;
+
+            this.connection = await amqp.connect(this.config.url);
+            this.channel = await this.connection.createChannel();
+
+            this.connection.on('error', (err) => {
+                console.error('RabbitMQ connection error:', err);
+                this.connection = null;
+                this.channel = null;
+            });
+
+            this.connection.on('close', () => {
+                console.warn('RabbitMQ connection closed. Reconnecting...');
+                this.connection = null;
+                this.channel = null;
+                setTimeout(() => this.connect(), this.config.reconnectDelay);
+            });
+
+            console.log('RabbitMQ connected.');
+        } catch (err) {
+            console.error('Failed to connect to RabbitMQ:', err);
+            setTimeout(() => this.connect(), this.config.reconnectDelay);
         }
     }
 
-    async createChannel(queueName, options = {}) {
-        const defaultOptions = {
-            durable: true,
-            deadLetterExchange: `${queueName}.dlx`
-        };
-        const channelOptions = { ...defaultOptions, ...options };
+    async publish(queueName, message) {
+        await this.connect();
 
         try {
-            const connection = await this.connect();
-            const channel = await connection.createChannel();
-
-            // Assert queue with dead-letter configuration
-            await channel.assertQueue(queueName, channelOptions);
-            await channel.assertExchange(`${queueName}.dlx`, 'direct');
-
-            this.channels.set(queueName, channel);
-            return channel;
-        } catch (error) {
-            console.error(`Channel Creation Error for ${queueName}:`, error);
-            await this.close();
-            throw error;
-        }
-    }
-
-    async publish(queueName, message, options = {}) {
-        try {
-            const channel = await this.createChannel(queueName);
+            await this.channel.assertQueue(queueName, { durable: true });
             const messageId = uuidv4();
-
-            const publishOptions = {
+            this.channel.sendToQueue(queueName, Buffer.from(JSON.stringify(message)), {
                 persistent: true,
                 messageId,
-                timestamp: Date.now(),
-                contentType: 'application/json',
-                appId: 'iot-event-api',
-                ...options
-            };
-
-            channel.sendToQueue(
-                queueName,
-                Buffer.from(JSON.stringify(message)),
-                publishOptions
-            );
-
+            });
             return messageId;
-        } catch (error) {
-            console.error(`Publish Error to ${queueName}:`, error);
-            await this.close();
-            throw error;
+        } catch (err) {
+            console.error('Error publishing message:', err);
+            throw err;
         }
     }
 
     async consume(queueName, handler, options = {}) {
-        const defaultOptions = {
-            noAck: false,
-            prefetch: 1
-        };
-        const consumeOptions = { ...defaultOptions, ...options };
+        await this.connect();
 
         try {
-            const channel = await this.createChannel(queueName);
+            await this.channel.assertQueue(queueName, { durable: true });
 
-            channel.prefetch(consumeOptions.prefetch);
+            if (options.prefetch) {
+                this.channel.prefetch(options.prefetch);
+            }
 
-            await channel.consume(queueName, async (msg) => {
+            this.channel.consume(queueName, async (msg) => {
                 if (!msg) return;
 
                 try {
                     const content = JSON.parse(msg.content.toString());
-                    await handler(content, msg);
-                    channel.ack(msg);
-                } catch (error) {
-                    console.error('Message Processing Error:', error);
-                    channel.nack(msg, false, false);
-                }
-            }, consumeOptions);
+                    await handler(content);
 
-        } catch (error) {
-            console.error(`Consume Error from ${queueName}:`, error);
-            await this.close();
-            throw error;
+                    if (!options.autoAck) {
+                        this.channel.ack(msg, true);
+                    }
+                } catch (err) {
+                    console.error('Error processing message:', err);
+                    this.channel.nack(msg, false, false);
+                }
+            });
+        } catch (err) {
+            console.error('Error consuming messages:', err);
+            throw err;
         }
     }
 
     async close() {
         try {
-            for (const [queue, channel] of this.channels) {
-                await channel.close();
-                this.channels.delete(queue);
-            }
-            if (this.connection) {
-                await this.connection.close();
-                this.connection = null;
-            }
-        } catch (error) {
-            console.error('RabbitMQ Shutdown Error:', error);
+            if (this.channel) await this.channel.close();
+            if (this.connection) await this.connection.close();
+        } catch (err) {
+            console.error('Error closing RabbitMQ connection:', err);
+        } finally {
+            this.channel = null;
+            this.connection = null;
         }
     }
 }

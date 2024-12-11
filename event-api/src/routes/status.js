@@ -61,7 +61,7 @@ router.get("/", async (req, res) => {
         }
         console.error("Error on connect with RabbitMQ:", error.message);
     } finally {
-        rabbitmq.disconnect(rabbitConn);
+        await rabbitmq.close();
     }
 
     if (hasError) {

@@ -1,13 +1,20 @@
+### GET stream events
+GET {{API_URL}}/events/stream
+
 ### GET events
-GET {{API_URL}}/events
+GET {{API_URL}}/events/consume
 
 ### POST event
 POST {{API_URL}}/events
 Content-Type: application/json
 
 {
-  "deviceId": "iot-sobjak",
-  "eventType": "temperature",
-  "value": 23.5,
-  "caraio": "caraio"
+    "name": "event1",
+    "data": {
+        "key1": "value1",
+        "key2": "value2"
+    }
 }
+
+### PATCH close connections
+PATCH {{API_URL}}/events/close

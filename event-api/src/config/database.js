@@ -14,10 +14,7 @@ async function connectMongo() {
     try {
         const uri = formatUri();
         await mongoose.connect(uri, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            maxPoolSize: 10,
-            minPoolSize: 3
+            connectTimeoutMS: 10000
         });
         isConnected = true;
         console.log('MongoDB connected');
