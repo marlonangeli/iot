@@ -1,0 +1,19 @@
+### GET devices
+GET {{API_URL}}/devices
+
+
+### GET device
+GET {{API_URL}}/devices
+
+
+### POST device
+POST {{API_URL}}/devices
+Content-Type: application/json
+
+{
+  "deviceId": "iot-sobjak-top",
+  "deviceType": "tracker"
+}
+
+### DELETE device
+DELETE {{API_URL}}/devices/iot-sobjak-top
