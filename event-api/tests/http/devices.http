@@ -1,11 +1,6 @@
 ### GET devices
 GET {{API_URL}}/devices
 
-
-### GET device
-GET {{API_URL}}/devices
-
-
 ### POST device
 POST {{API_URL}}/devices
 Content-Type: application/json

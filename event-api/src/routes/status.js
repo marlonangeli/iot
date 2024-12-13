@@ -45,7 +45,8 @@ router.get("/", async (req, res) => {
 
     let rabbitConn = null;
     try {
-        rabbitConn = await rabbitmq.connect();
+        await rabbitmq.connect();
+        const rabbitConn = rabbitmq.connection;
         const rabbitmqProps = await rabbitConn.connection.serverProperties;
         response.services.rabbitmq = {
             status: "healthy",
