@@ -1,0 +1,17 @@
+﻿### Signup - Criar novo usuário
+POST {{API_AUTH_URL}}/signup
+Content-Type: application/json
+
+{
+    "email": "usuario@exemplo.com",
+    "password": "SenhaForte123!"
+}
+
+### Signup - Usuário já existente (deve retornar erro)
+POST {{API_AUTH_URL}}/signup
+Content-Type: application/json
+
+{
+    "email": "usuario@exemplo.com",
+    "password": "SenhaForte123!"
+}

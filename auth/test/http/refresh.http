@@ -1,0 +1,23 @@
+﻿### Refresh Token - Válido
+< {%
+    client.global.get("refresh_token");
+%}
+POST {{API_AUTH_URL}}/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refresh_token}}"
+}
+
+> {%
+    client.global.set("auth_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+### Refresh Token - Inválido
+POST {{API_AUTH_URL}}/refresh
+Content-Type: application/json
+
+{
+    "refresh_token": "token-invalido"
+}
