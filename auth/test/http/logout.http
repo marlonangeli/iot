@@ -1,0 +1,6 @@
+﻿### Logout
+< {%
+    client.global.get("auth_token");
+%}
+POST {{API_AUTH_URL}}/logout
+Authorization: {{auth_token}}

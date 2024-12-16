@@ -1,0 +1,23 @@
+﻿### Login - Credenciais válidas
+POST {{API_AUTH_URL}}/login
+Content-Type: application/json
+
+{
+    "email": "usuario@exemplo.com",
+    "password": "SenhaForte123!"
+}
+
+> {%
+    client.global.set("auth_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+
+### Login - Credenciais inválidas
+POST {{API_AUTH_URL}}/login
+Content-Type: application/json
+
+{
+    "email": "usuario@exemplo.com",
+    "password": "SenhaErrada123"
+}
