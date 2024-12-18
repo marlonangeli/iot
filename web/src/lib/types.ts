@@ -73,7 +73,7 @@ export const VehicleSchema = z.object({
   }),
   transactions: z.array(z.object({
     id: z.number().optional()
-  })).optional()
+  })).optional().nullable()
 });
 
 export const EventSchema = z.object({

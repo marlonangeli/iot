@@ -1,163 +1,191 @@
-'use client'
+'use client';
 
-import {useState} from 'react'
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
-import {Button} from "@/components/ui/button"
-import {Input} from "@/components/ui/input"
-import {Label} from "@/components/ui/label"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog"
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
-import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts'
+import {useState} from 'react';
+import {Vehicle} from "@/lib/types";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {useToast} from "@/hooks/use-toast";
+import {useCreateVehicle, useDeleteVehicle, useUpdateVehicle, useVehicles} from "@/lib/store/vehicle-store";
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import {VehicleForm} from "@/components/vehicle/vehicle-form";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {CreateVehicle} from "@/lib/clients/logi.types";
 
-const vehicles = [
-  {
-    id: 1,
-    licensePlate: 'ABC123',
-    type: 'truck',
-    status: 'en route',
-    origin: 'Warehouse A',
-    destination: 'Store 1',
-    cargo: 'Electronics'
-  },
-  {
-    id: 2,
-    licensePlate: 'DEF456',
-    type: 'ship',
-    status: 'loading',
-    origin: 'Port B',
-    destination: 'Port C',
-    cargo: 'Furniture'
-  },
-  {
-    id: 3,
-    licensePlate: 'GHI789',
-    type: 'train',
-    status: 'unloading',
-    origin: 'Station X',
-    destination: 'Station Y',
-    cargo: 'Raw Materials'
-  },
-  {
-    id: 4,
-    licensePlate: 'JKL012',
-    type: 'airplane',
-    status: 'maintenance',
-    origin: 'Airport 1',
-    destination: 'Airport 2',
-    cargo: 'Perishables'
-  },
-]
+export default function VehicleManagementPage() {
+  const {toast} = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
 
-const temperatureData = [
-  {time: '00:00', temperature: 20},
-  {time: '04:00', temperature: 22},
-  {time: '08:00', temperature: 25},
-  {time: '12:00', temperature: 28},
-  {time: '16:00', temperature: 26},
-  {time: '20:00', temperature: 23},
-]
+  const {data: vehiclesPage, isLoading, isError} = useVehicles();
+  const createVehicleMutation = useCreateVehicle();
+  const updateVehicleMutation = useUpdateVehicle();
+  const deleteVehicleMutation = useDeleteVehicle();
 
-export default function TransportPage() {
-  const [searchTerm, setSearchTerm] = useState('')
+  const filteredVehicles = vehiclesPage?.content.filter(vehicle =>
+    vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
 
-  const filteredVehicles = vehicles.filter(vehicle =>
-    vehicle.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.type.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const handleCreateVehicle = (data: CreateVehicle) => {
+    createVehicleMutation.mutate(data, {
+      onSuccess: (createdVehicle) => {
+        toast({
+          title: "Vehicle Created",
+          description: `Vehicle ${createdVehicle.name} has been added.`
+        });
+        setIsCreateModalOpen(false);
+      },
+      onError: (error) => {
+        toast({
+          title: "Error Creating Vehicle",
+          description: error.message,
+          variant: "destructive"
+        });
+      }
+    });
+  };
+
+  const handleUpdateVehicle = (data: Partial<Vehicle>) => {
+    if (editingVehicle) {
+      updateVehicleMutation.mutate(
+        {id: editingVehicle.id!, vehicle: data},
+        {
+          onSuccess: (updatedVehicle) => {
+            toast({
+              title: "Vehicle Updated",
+              description: `Vehicle ${updatedVehicle.name} has been updated.`
+            });
+            setEditingVehicle(null);
+          },
+          onError: (error) => {
+            toast({
+              title: "Error Updating Vehicle",
+              description: error.message,
+              variant: "destructive"
+            });
+          }
+        }
+      );
+    }
+  };
+
+  const handleDeleteVehicle = () => {
+    if (editingVehicle) {
+      deleteVehicleMutation.mutate(editingVehicle.id!, {
+        onSuccess: () => {
+          toast({
+            title: "Vehicle Deleted",
+            description: `Vehicle ${editingVehicle.name} has been deleted.`
+          });
+          setEditingVehicle(null);
+        },
+        onError: (error) => {
+          toast({
+            title: "Error Deleting Vehicle",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
+      });
+    }
+  };
+
+  if (isLoading) return <div>Loading vehicles...</div>;
+  if (isError) return <div>Error loading vehicles</div>;
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Transport Management</h1>
+    <div className="container mx-auto p-4 space-y-4">
+      <h1 className="text-2xl font-bold">Vehicle Management</h1>
 
-      <div className="flex space-x-2">
-        <Input
-          placeholder="Search vehicles..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
-        />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>Add Vehicle</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Vehicle</DialogTitle>
-              <DialogDescription>Enter the details for the new vehicle.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="licensePlate" className="text-right">License Plate</Label>
-                <Input id="licensePlate" className="col-span-3"/>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="type" className="text-right">Type</Label>
-                <Select>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select type"/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="truck">Truck</SelectItem>
-                    <SelectItem value="ship">Ship</SelectItem>
-                    <SelectItem value="train">Train</SelectItem>
-                    <SelectItem value="airplane">Airplane</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Add Vehicle</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+      <div className="flex justify-between items-center gap-4">
+        <div className="flex-1">
+          <Input
+            placeholder="Search vehicles by name or plate..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <Button onClick={() => setIsCreateModalOpen(true)}>
+          Add Vehicle
+        </Button>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>License Plate</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Origin</TableHead>
-            <TableHead>Destination</TableHead>
-            <TableHead>Cargo</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredVehicles.map((vehicle) => (
-            <TableRow key={vehicle.id}>
-              <TableCell>{vehicle.licensePlate}</TableCell>
-              <TableCell>{vehicle.type}</TableCell>
-              <TableCell>{vehicle.status}</TableCell>
-              <TableCell>{vehicle.origin}</TableCell>
-              <TableCell>{vehicle.destination}</TableCell>
-              <TableCell>{vehicle.cargo}</TableCell>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Plate</TableHead>
+              <TableHead>Assigned Device</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      <h2 className="text-xl font-semibold mt-8">Cargo Temperature (Last 24 hours)</h2>
-      <div style={{width: '100%', height: 300}}>
-        <ResponsiveContainer>
-          <LineChart data={temperatureData}>
-            <CartesianGrid strokeDasharray="3 3"/>
-            <XAxis dataKey="time"/>
-            <YAxis/>
-            <Tooltip/>
-            <Legend/>
-            <Line type="monotone" dataKey="temperature" stroke="#8884d8"/>
-          </LineChart>
-        </ResponsiveContainer>
+          </TableHeader>
+          <TableBody>
+            {filteredVehicles.map((vehicle) => (
+              <TableRow key={vehicle.id}>
+                <TableCell>{vehicle.name}</TableCell>
+                <TableCell>{vehicle.plate}</TableCell>
+                <TableCell>{vehicle.device?.name || 'None'}</TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setEditingVehicle(vehicle)}
+                  >
+                    Edit
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
+
+      <Dialog
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Vehicle</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new vehicle.
+            </DialogDescription>
+          </DialogHeader>
+          <VehicleForm
+            mode="create"
+            onSubmit={handleCreateVehicle}
+            isLoading={createVehicleMutation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!editingVehicle}
+        onOpenChange={(open) => {
+          if (!open) setEditingVehicle(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Vehicle</DialogTitle>
+            <DialogDescription>
+              Modify the details for the selected vehicle.
+            </DialogDescription>
+          </DialogHeader>
+          <VehicleForm
+            mode="edit"
+            initialData={editingVehicle || undefined}
+            onUpdate={handleUpdateVehicle}
+            onDelete={handleDeleteVehicle}
+            isLoading={
+              updateVehicleMutation.isPending ||
+              deleteVehicleMutation.isPending
+            }
+          />
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }

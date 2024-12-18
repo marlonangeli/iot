@@ -51,7 +51,7 @@ router.get('/stream', async (req, res) => {
 
 // GET: Fetch a batch of messages without streaming
 router.get('/consume', async (req, res) => {
-    const messages = [];
+    let messages = [];
     let count = 0;
 
     try {

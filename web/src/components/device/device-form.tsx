@@ -1,28 +1,14 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import { Device, DeviceSchema, DeviceTypeEnum, DeviceStatusEnum } from "@/lib/types";
-import { z } from "zod";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {Device, DeviceSchema, DeviceStatusEnum, DeviceTypeEnum} from "@/lib/types";
+import {z} from "zod";
 
 // Form schema for create/update
-const FormSchema = DeviceSchema.omit({ id: true, location: true, lastTracking: true });
+const FormSchema = DeviceSchema.omit({id: true, location: true, lastTracking: true});
 type FormData = z.infer<typeof FormSchema>;
 
 interface DeviceFormProps {
@@ -40,7 +26,6 @@ export function DeviceForm({
                              isLoading = false,
                              mode = 'create'
                            }: DeviceFormProps) {
-  // Create form with zod resolver
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -61,14 +46,14 @@ export function DeviceForm({
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>Device Name</FormLabel>
               <FormControl>
                 <Input placeholder="Enter device name" {...field} />
               </FormControl>
               <FormDescription>Enter a unique name for the device.</FormDescription>
-              <FormMessage />
+              <FormMessage/>
             </FormItem>
           )}
         />
@@ -77,7 +62,7 @@ export function DeviceForm({
         <FormField
           control={form.control}
           name="type"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>Device Type</FormLabel>
               <Select
@@ -86,7 +71,7 @@ export function DeviceForm({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select device type" />
+                    <SelectValue placeholder="Select device type"/>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -96,7 +81,7 @@ export function DeviceForm({
                 </SelectContent>
               </Select>
               <FormDescription>Choose the type of device you are adding.</FormDescription>
-              <FormMessage />
+              <FormMessage/>
             </FormItem>
           )}
         />
@@ -105,7 +90,7 @@ export function DeviceForm({
         <FormField
           control={form.control}
           name="status"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>Device Status</FormLabel>
               <Select
@@ -114,7 +99,7 @@ export function DeviceForm({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select device status" />
+                    <SelectValue placeholder="Select device status"/>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -124,7 +109,7 @@ export function DeviceForm({
                 </SelectContent>
               </Select>
               <FormDescription>Set the current status of the device.</FormDescription>
-              <FormMessage />
+              <FormMessage/>
             </FormItem>
           )}
         />

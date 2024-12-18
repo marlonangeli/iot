@@ -41,7 +41,7 @@ export default function Sidebar() {
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0`}>
         <div className="flex flex-col h-full">
           <div className="p-4">
-            <h1 className="text-2xl font-bold">IoT Dashboard</h1>
+            <h1 className="text-2xl font-bold">LogIoT</h1>
           </div>
           <ScrollArea className="flex-1">
             <nav className="space-y-2 p-2">

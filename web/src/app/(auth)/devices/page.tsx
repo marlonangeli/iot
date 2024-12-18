@@ -28,7 +28,6 @@ export default function DeviceManagementPage() {
     (filterType === '' || device.type === filterType)
   ) || [];
 
-  // Create device handler
   const handleCreateDevice = (data: Omit<Device, 'id'>) => {
     createDeviceMutation.mutate(data, {
       onSuccess: (createdDevice) => {
@@ -48,7 +47,6 @@ export default function DeviceManagementPage() {
     });
   };
 
-  // Update device handler
   const handleUpdateDevice = (data: Omit<Device, 'id'>) => {
     if (editingDevice) {
       updateDeviceMutation.mutate(
@@ -73,7 +71,6 @@ export default function DeviceManagementPage() {
     }
   };
 
-  // Delete device handler
   const handleDeleteDevice = () => {
     if (editingDevice) {
       deleteDeviceMutation.mutate(editingDevice.id!, {
