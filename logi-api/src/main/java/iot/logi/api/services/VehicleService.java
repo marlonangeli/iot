@@ -55,13 +55,13 @@ public class VehicleService {
     }
 
     @Transactional
-    public Vehicle updateVehicle(Long id, VehicleDto vehicleDto) {
+    public Vehicle updateVehicle(Long id, Vehicle newVehicle) {
         Vehicle vehicle = findVehicleById(id);
-        vehicle.setName(vehicleDto.getName());
-        vehicle.setPlate(vehicleDto.getPlate());
+        vehicle.setName(newVehicle.getName());
+        vehicle.setPlate(newVehicle.getPlate());
 
-        if (vehicleDto.getDeviceId() != null) {
-            Device device = deviceRepository.findById(vehicleDto.getDeviceId())
+        if (newVehicle.getDevice().getId() != null) {
+            Device device = deviceRepository.findById(newVehicle.getDevice().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Dispositivo não encontrado"));
             vehicle.setDevice(device);
         }

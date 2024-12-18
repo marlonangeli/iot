@@ -1,0 +1,12 @@
+### GET vehicles
+GET {{API_URL}}/vehicles
+
+### POST vehicles
+POST {{API_URL}}/vehicles
+Content-Type: application/json
+
+{
+    "name": "vehicle-xyz",
+    "plate": "ABC1234",
+    "deviceId": 1
+}

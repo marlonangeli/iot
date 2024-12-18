@@ -42,8 +42,8 @@ public class VehiclesController {
     }
 
     @PutMapping("/{id}")
-    public Vehicle update(@PathVariable Long id, @Valid @RequestBody VehicleDto vehicleDto) {
-        return vehicleService.updateVehicle(id, vehicleDto);
+    public Vehicle update(@PathVariable Long id, @Valid @RequestBody Vehicle vehicle) {
+        return vehicleService.updateVehicle(id, vehicle);
     }
 
     @DeleteMapping("/{id}")

@@ -13,5 +13,4 @@ Content-Type: application/json
 }
 
 ### DELETE /devices/1
-@id = 1
 DELETE {{API_URL}}/devices/{{id}}

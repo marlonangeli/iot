@@ -1,7 +1,7 @@
 ﻿### Perfil do Usuário (Rota Protegida)
 
 < {%
-    request.variables.get("auth_token")
+    client.global.get("auth_token")
 %}
 GET {{API_URL}}/profile
 Authorization: {{auth_token}}

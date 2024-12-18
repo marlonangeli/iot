@@ -21,5 +21,5 @@ COPY --from=builder /app/dist /app
 RUN chown -R node:node /app && chmod -R 755 /app
 USER node
 
-EXPOSE 3000
+EXPOSE 8000
 CMD ["node", "server.js"]
