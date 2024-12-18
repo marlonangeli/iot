@@ -20,26 +20,34 @@ router.post('/', async (req, res) => {
 
 // GET: Stream messages in real-time
 router.get('/stream', async (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Type', 'application/x-ndjson');
     res.setHeader('Transfer-Encoding', 'chunked');
+
+    let clientClosed = false;
+
+    const handleClientClose = async () => {
+        clientClosed = true;
+        console.log('Client disconnected');
+        await rabbitMQ.close();
+    };
+
+    res.on('close', handleClientClose);
 
     try {
         await rabbitMQ.consume(
             QUEUE_NAME,
             (message) => {
-                res.write(`${JSON.stringify(message)}\n`);
+                if (!clientClosed) {
+                    res.write(`${JSON.stringify(message)}\n`);
+                }
             }
         );
     } catch (err) {
         console.error('Stream error:', err);
         res.status(500).end();
-    } finally {
-
-        res.on('close', async () => {
-            await rabbitMQ.close();
-        })
     }
 });
+
 
 // GET: Fetch a batch of messages without streaming
 router.get('/consume', async (req, res) => {
