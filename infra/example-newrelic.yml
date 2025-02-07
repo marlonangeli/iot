@@ -23,12 +23,12 @@ common: &default_settings
   # If enable_auto_app_naming is false, the agent reports all data to this application.
   # Otherwise, the agent reports only background tasks (transactions for non-web applications)
   # to this application. To report data to more than one application
-  # (useful for rollup reporting), separate the application names with ";".
-  # For example, to report data to "My Application" and "My Application 2" use this:
+  # (useful for rollup reporting), separate the application names with ;.
+  # For example, to report data to My Application and My Application 2 use this:
   # app_name: My Application;My Application 2
   # This setting is required. Up to 3 different application names can be specified.
   # The first application name must be unique.
-  app_name: "logi-api"
+  app_name: logi-api
 
   # To enable high security, set this property to true. When in high
   # security mode, the agent will use SSL and obfuscated SQL. Additionally,
@@ -160,16 +160,16 @@ common: &default_settings
     # Threshold in seconds for when to collect a transaction
     # trace. When the response time of a controller action exceeds
     # this threshold, a transaction trace will be recorded and sent to
-    # New Relic. Valid values are any float value, or (default) "apdex_f",
-    # which will use the threshold for the "Frustrated" Apdex level
+    # New Relic. Valid values are any float value, or (default) apdex_f,
+    # which will use the threshold for the Frustrated Apdex level
     # (greater than four times the apdex_t value).
     # Default is apdex_f.
     transaction_threshold: apdex_f
 
     # When transaction tracer is on, SQL statements can optionally be
-    # recorded. The recorder has three modes, "off" which sends no
-    # SQL, "raw" which sends the SQL statement in its original form,
-    # and "obfuscated", which strips out numeric and string literals.
+    # recorded. The recorder has three modes, off which sends no
+    # SQL, raw which sends the SQL statement in its original form,
+    # and obfuscated, which strips out numeric and string literals.
     # Default is obfuscated.
     record_sql: obfuscated
 
@@ -369,15 +369,15 @@ common: &default_settings
 
 development:
   <<: *default_settings
-  app_name: "logi-api (Development)"
+  app_name: logi-api (Development)
 
 test:
   <<: *default_settings
-  app_name: "logi-api (Test)"
+  app_name: logi-api (Test)
 
 production:
   <<: *default_settings
 
 staging:
   <<: *default_settings
-  app_name: "logi-api (Staging)"
+  app_name: logi-api (Staging)
