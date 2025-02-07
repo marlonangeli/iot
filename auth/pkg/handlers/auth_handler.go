@@ -97,12 +97,14 @@ func (h *AuthHandlers) Logout(c *gin.Context) {
 
 func (h *AuthHandlers) GetProfile(c *gin.Context) {
 	email, exists := c.Get("email")
+	role, _ := c.Get("role")
+	userId, _ := c.Get("user_id")
 	if !exists {
 		respondWithError(c, http.StatusUnauthorized, "User not authenticated")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"email": email, "message": "Profile retrieved successfully"})
+	c.JSON(http.StatusOK, gin.H{"email": email, "role": role, "user_id": userId})
 }
 
 func (h *AuthHandlers) HealthCheck(c *gin.Context) {
@@ -139,6 +141,8 @@ func (h *AuthHandlers) AuthMiddleware(c *gin.Context) {
 	h.supabaseClient.UpdateAuthSession(session)
 
 	c.Set("email", claims.Email)
+	c.Set("role", claims.Role)
+	c.Set("user_id", claims.Subject)
 	c.Next()
 }
 

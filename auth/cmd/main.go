@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Load configuration
-	envPath := "../../infra/.env"
+	envPath := "../infra/.env"
 	cfg, err := config.LoadConfig(envPath)
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
