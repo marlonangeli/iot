@@ -21,11 +21,11 @@ export default function Notifications() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+        <DropdownMenuLabel>Notificações</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>New device alert</DropdownMenuItem>
-        <DropdownMenuItem>Temperature threshold exceeded</DropdownMenuItem>
-        <DropdownMenuItem>Battery low on Device ID: 1234</DropdownMenuItem>
+        <DropdownMenuItem>Alerta de novo dispositivo</DropdownMenuItem>
+        <DropdownMenuItem>Limite de temperatura atingido</DropdownMenuItem>
+        <DropdownMenuItem>Nível de bateria baixo no dispositivo ID: 1234</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -1,17 +1,19 @@
 import {z} from 'zod';
 
-export const DeviceTypeEnum = z.enum(['TRACKER', 'SENSOR', 'GATEWAY', 'WEATHER']);
+export const DeviceTypeEnum = z.enum(['WEATHER', 'TRANSPORT', 'METRIC', 'STORAGE']);
 export type DeviceType = z.infer<typeof DeviceTypeEnum>;
 
-export const DeviceStatusEnum = z.enum(['ACTIVE', 'INACTIVE', 'MAINTENANCE', 'ERROR']);
+export const DeviceStatusEnum = z.enum(['ACTIVE', 'INACTIVE', 'MAINTENANCE', 'BROKEN']);
 export type DeviceStatus = z.infer<typeof DeviceStatusEnum>;
 
-export const LocationTypeEnum = z.enum(['WAREHOUSE', 'DEPOT', 'DISTRIBUTION_CENTER', 'CUSTOMER_LOCATION']);
+export const LocationTypeEnum = z.enum(['STORAGE', 'DISTRIBUTION', 'FACTORY', 'FARM']);
 export type LocationType = z.infer<typeof LocationTypeEnum>;
+
+const NAME_CARACHTERS = "Nome deve ter pelo menos 2 caracteres";
 
 export const DeviceSchema = z.object({
   id: z.number().optional(),
-  name: z.string().min(2, {message: "Name must be at least 2 characters"}).max(64),
+  name: z.string().min(2, {message: NAME_CARACHTERS}).max(64),
   location: z.object({
     id: z.number().nullable().optional(),
     name: z.string().optional()
@@ -23,7 +25,7 @@ export const DeviceSchema = z.object({
 
 export const DriverSchema = z.object({
   id: z.number().optional(),
-  name: z.string().min(2, {message: "Name must be at least 2 characters"}).max(64),
+  name: z.string().min(2, {message: NAME_CARACHTERS}).max(64),
   transactions: z.array(z.object({
     id: z.number().optional()
   })).optional()
@@ -31,7 +33,7 @@ export const DriverSchema = z.object({
 
 export const LocationSchema = z.object({
   id: z.number().optional(),
-  name: z.string().min(2, {message: "Name must be at least 2 characters"}).max(64),
+  name: z.string().min(2, {message: NAME_CARACHTERS}).max(64),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   type: LocationTypeEnum,
@@ -66,7 +68,7 @@ export const TransactionSchema = z.object({
 export const VehicleSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(2).max(32),
-  plate: z.string().regex(/^[A-Z]{3}\d{4}$/, {message: "Plate must be in format ABC1234"}),
+  plate: z.string().regex(/^[A-Z]{3}\d{4}$/, {message: "Placa deve estar no formato ABC1234"}),
   device: z.object({
     id: z.number(),
     name: z.string().optional()

@@ -20,7 +20,7 @@ export default function LoginPage() {
       localStorage.setItem('isAuthenticated', 'true')
       router.push('/dashboard')
     } else {
-      setError('Invalid credentials')
+      setError('Credenciais inválidas')
     }
   }
 

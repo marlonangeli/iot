@@ -16,10 +16,10 @@ const trackerIcon = new Icon({
 })
 
 const devices = [
-  {id: 1, name: 'Temperature Sensor 1', type: 'sensor', lat: 51.505, lng: -0.09},
-  {id: 2, name: 'GPS Tracker 1', type: 'tracker', lat: 51.51, lng: -0.1},
-  {id: 3, name: 'Humidity Sensor 1', type: 'sensor', lat: 51.515, lng: -0.09},
-  {id: 4, name: 'Environmental Monitor 1', type: 'sensor', lat: 51.52, lng: -0.1},
+  {id: 1, name: 'Sensor de temperatura 1', type: 'sensor', lat: 51.505, lng: -0.09},
+  {id: 2, name: 'GPS 1', type: 'tracker', lat: 51.51, lng: -0.1},
+  {id: 3, name: 'Sensor de umidade 1', type: 'sensor', lat: 51.515, lng: -0.09},
+  {id: 4, name: 'Sensor de ambiente 1', type: 'sensor', lat: 51.52, lng: -0.1},
 ]
 
 export default function MapPage() {
@@ -28,7 +28,7 @@ export default function MapPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Interactive Map</h1>
+      <h1 className="text-2xl font-bold">Mapa</h1>
 
       <div style={{height: '500px', width: '100%'}}>
         <MapContainer center={[center.lat, center.lng]} zoom={zoom} style={{height: '100%', width: '100%'}}>
@@ -45,7 +45,7 @@ export default function MapPage() {
               <Popup>
                 <div>
                   <h3 className="font-bold">{device.name}</h3>
-                  <p>Type: {device.type}</p>
+                  <p>Tipo: {device.type}</p>
                 </div>
               </Popup>
             </Marker>

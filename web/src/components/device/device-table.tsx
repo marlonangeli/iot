@@ -19,10 +19,10 @@ export function DeviceTable({ devices, onEditDevice }: DeviceTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Type</TableHead>
+          <TableHead>Nome</TableHead>
+          <TableHead>Tipo</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead>Ações</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -33,7 +33,7 @@ export function DeviceTable({ devices, onEditDevice }: DeviceTableProps) {
             <TableCell>{device.status}</TableCell>
             <TableCell>
               <Button onClick={() => onEditDevice(device)}>
-                Edit
+                Editar
               </Button>
             </TableCell>
           </TableRow>

@@ -9,11 +9,11 @@ import {Activity, Bell, Cpu, LayoutDashboard, LogOut, Map, Menu, Settings, Truck
 
 const sidebarItems = [
   {name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard'},
-  {name: 'Device Management', icon: Cpu, href: '/devices'},
-  {name: 'Interactive Map', icon: Map, href: '/map'},
-  {name: 'Transport Management', icon: Truck, href: '/transport'},
-  {name: 'Event Streaming', icon: Activity, href: '/events'},
-  {name: 'Alerts', icon: Bell, href: '/alerts'},
+  {name: 'Dispositivos', icon: Cpu, href: '/devices'},
+  {name: 'Mapa', icon: Map, href: '/map'},
+  {name: 'Transporte', icon: Truck, href: '/transport'},
+  {name: 'Eventos', icon: Activity, href: '/events'},
+  {name: 'Alertas', icon: Bell, href: '/alerts'},
 ]
 
 export default function Sidebar() {
@@ -58,11 +58,11 @@ export default function Sidebar() {
           <div className="p-4 space-y-2">
             <Button variant="ghost" className="w-full justify-start">
               <Settings className="mr-2 h-4 w-4"/>
-              Settings
+              Configurações
             </Button>
             <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4"/>
-              Logout
+              Sair
             </Button>
           </div>
         </div>

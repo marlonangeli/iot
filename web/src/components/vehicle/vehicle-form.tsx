@@ -68,16 +68,16 @@ export function VehicleForm({
           name="name"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Vehicle Name</FormLabel>
+              <FormLabel>Nome</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Enter vehicle name"
+                  placeholder="Caminhão de insumos"
                   {...field}
                   disabled={isLoading}
                 />
               </FormControl>
               <FormDescription>
-                Name must be between 2 and 32 characters
+                O tamanho do nome deve estar entre 2 e 32 caracteres
               </FormDescription>
               <FormMessage/>
             </FormItem>
@@ -89,7 +89,7 @@ export function VehicleForm({
           name="plate"
           render={({field}) => (
             <FormItem>
-              <FormLabel>License Plate</FormLabel>
+              <FormLabel>Placa</FormLabel>
               <FormControl>
                 <Input
                   placeholder="ABC1234"
@@ -99,7 +99,7 @@ export function VehicleForm({
                 />
               </FormControl>
               <FormDescription>
-                Plate must be in format ABC1234
+                A placa deve estar no formato ABC1234
               </FormDescription>
               <FormMessage/>
             </FormItem>
@@ -111,7 +111,7 @@ export function VehicleForm({
           name="deviceId"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Assigned Device</FormLabel>
+              <FormLabel>Dispositivo atribuído</FormLabel>
               <Select
                 disabled={isLoading}
                 onValueChange={(value) => field.onChange(Number(value))}
@@ -119,7 +119,7 @@ export function VehicleForm({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a device"/>
+                    <SelectValue placeholder="Selecione um dispositivo"/>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -134,7 +134,7 @@ export function VehicleForm({
                 </SelectContent>
               </Select>
               <FormDescription>
-                Select the device to be assigned to this vehicle
+                Selecione o dispositivo para atribuir ao veículo
               </FormDescription>
               <FormMessage/>
             </FormItem>
@@ -147,8 +147,8 @@ export function VehicleForm({
             disabled={isLoading}
           >
             {isLoading
-              ? mode === 'create' ? 'Creating...' : 'Updating...'
-              : mode === 'create' ? 'Create Vehicle' : 'Update Vehicle'
+              ? mode === 'create' ? 'Criando...' : 'Atualizando...'
+              : mode === 'create' ? 'Criar' : 'Atualizar'
             }
           </Button>
 
@@ -156,24 +156,24 @@ export function VehicleForm({
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" disabled={isLoading}>
-                  Delete Vehicle
+                  Deletar
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the
-                    vehicle and remove its data from the system.
+                    Esta ação não pode ser desfeita. Isso excluirá permanentemente o
+                    veículo e remover seus dados do sistema.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={onDelete}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Delete
+                    Deletar
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

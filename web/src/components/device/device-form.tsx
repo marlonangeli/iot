@@ -48,11 +48,11 @@ export function DeviceForm({
           name="name"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Device Name</FormLabel>
+              <FormLabel>Nome</FormLabel>
               <FormControl>
-                <Input placeholder="Enter device name" {...field} />
+                <Input placeholder="Sensor de umidade" {...field} />
               </FormControl>
-              <FormDescription>Enter a unique name for the device.</FormDescription>
+              <FormDescription>Insira um nome para o dispositivo.</FormDescription>
               <FormMessage/>
             </FormItem>
           )}
@@ -64,14 +64,14 @@ export function DeviceForm({
           name="type"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Device Type</FormLabel>
+              <FormLabel>Tipo</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value || ''}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select device type"/>
+                    <SelectValue placeholder="Selecione o tipo do dispositivo"/>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -80,7 +80,7 @@ export function DeviceForm({
                   ))}
                 </SelectContent>
               </Select>
-              <FormDescription>Choose the type of device you are adding.</FormDescription>
+              <FormDescription>Escolha o tipo de dispositivo que você está adicionando.</FormDescription>
               <FormMessage/>
             </FormItem>
           )}
@@ -92,14 +92,14 @@ export function DeviceForm({
           name="status"
           render={({field}) => (
             <FormItem>
-              <FormLabel>Device Status</FormLabel>
+              <FormLabel>Status</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value || ''}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select device status"/>
+                    <SelectValue placeholder="Selecione o status do dispositivo"/>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -108,7 +108,7 @@ export function DeviceForm({
                   ))}
                 </SelectContent>
               </Select>
-              <FormDescription>Set the current status of the device.</FormDescription>
+              <FormDescription>Defina o status atual do dispositivo.</FormDescription>
               <FormMessage/>
             </FormItem>
           )}
@@ -120,8 +120,8 @@ export function DeviceForm({
             disabled={isLoading}
           >
             {mode === 'create'
-              ? (isLoading ? 'Creating...' : 'Create Device')
-              : (isLoading ? 'Updating...' : 'Update Device')
+              ? (isLoading ? 'Criando...' : 'Criar')
+              : (isLoading ? 'Atualizando...' : 'Atualizar')
             }
           </Button>
           {mode === 'edit' && onDelete && (
@@ -131,7 +131,7 @@ export function DeviceForm({
               onClick={onDelete}
               disabled={isLoading}
             >
-              Delete Device
+              Deletar
             </Button>
           )}
         </div>

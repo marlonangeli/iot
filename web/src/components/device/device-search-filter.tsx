@@ -31,17 +31,17 @@ export function DeviceSearchFilter({
   return (
     <div className="flex space-x-2">
       <Input
-        placeholder="Search devices..."
+        placeholder="Buscar dispositivos..."
         value={searchTerm}
         onChange={(e) => handleSearchChange(e.target.value)}
         className="max-w-sm"
       />
       <Select value={filterType} onValueChange={handleFilterChange}>
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Filter by type"/>
+          <SelectValue placeholder="Filtrar por tipo"/>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="ALL">All Types</SelectItem>
+          <SelectItem value="ALL">Todos os tipos</SelectItem>
           {Object.values(DeviceTypeEnum.enum).map((type) => (
             <SelectItem key={type} value={type}>{type}</SelectItem>
           ))}
@@ -49,7 +49,7 @@ export function DeviceSearchFilter({
       </Select>
 
       <Button onClick={onAddDevice}>
-        Add Device
+        Adicionar
       </Button>
     </div>
   );

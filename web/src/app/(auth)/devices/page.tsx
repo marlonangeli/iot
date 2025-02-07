@@ -32,14 +32,14 @@ export default function DeviceManagementPage() {
     createDeviceMutation.mutate(data, {
       onSuccess: (createdDevice) => {
         toast({
-          title: "Device Created Successfully",
-          description: `Device ${createdDevice.name} has been added.`
+          title: "Dispositivo criado",
+          description: `O dispositivo ${createdDevice.name} foi criado.`
         });
         setIsCreateModalOpen(false);
       },
       onError: (error) => {
         toast({
-          title: "Error Creating Device",
+          title: "Erro criando dispositivo",
           description: error.message,
           variant: "destructive"
         });
@@ -54,14 +54,14 @@ export default function DeviceManagementPage() {
         {
           onSuccess: (updatedDevice) => {
             toast({
-              title: "Device Updated Successfully",
-              description: `Device ${updatedDevice.name} has been updated.`
+              title: "Dispositivo atualizado",
+              description: `O dispositivo ${updatedDevice.name} foi atualizado.`
             });
             setEditingDevice(null);
           },
           onError: (error) => {
             toast({
-              title: "Error Updating Device",
+              title: "Erro atualizando dispositivo",
               description: error.message,
               variant: "destructive"
             });
@@ -76,14 +76,14 @@ export default function DeviceManagementPage() {
       deleteDeviceMutation.mutate(editingDevice.id!, {
         onSuccess: () => {
           toast({
-            title: "Device Deleted",
-            description: `Device ${editingDevice.name} has been deleted.`
+            title: "Dispositivo deletado",
+            description: `Dispositivo ${editingDevice.name} foi deletado.`
           });
           setEditingDevice(null);
         },
         onError: (error) => {
           toast({
-            title: "Error Deleting Device",
+            title: "Erro deletando dispositivo",
             description: error.message,
             variant: "destructive"
           });
@@ -92,12 +92,12 @@ export default function DeviceManagementPage() {
     }
   };
 
-  if (isLoading) return <div>Loading devices...</div>;
-  if (isError) return <div>Error loading devices</div>;
+  if (isLoading) return <div>Carregando dispositivos...</div>;
+  if (isError) return <div>Erro carregando dispositivos</div>;
 
   return (
     <div className="container mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Device Management</h1>
+      <h1 className="text-2xl font-bold">Gerenciamento de dispositivos</h1>
 
       {/* Search and Filter Component */}
       <DeviceSearchFilter
@@ -121,8 +121,8 @@ export default function DeviceManagementPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Device</DialogTitle>
-            <DialogDescription>Enter the details for the new device.</DialogDescription>
+            <DialogTitle>Adicionar novo dispositivp</DialogTitle>
+            <DialogDescription>Digite as informações do novo dispositivo.</DialogDescription>
           </DialogHeader>
           <DeviceForm
             mode="create"
@@ -141,8 +141,8 @@ export default function DeviceManagementPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Device</DialogTitle>
-            <DialogDescription>Modify the details for the selected device.</DialogDescription>
+            <DialogTitle>Editar dispositivo</DialogTitle>
+            <DialogDescription>Altere as informações do dispositivo selecionado.</DialogDescription>
           </DialogHeader>
           <DeviceForm
             mode="edit"

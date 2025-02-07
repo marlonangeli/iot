@@ -9,29 +9,35 @@ interface VehicleTableProps {
 
 export function VehicleTable({vehicles, onEditVehicle}: VehicleTableProps) {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Plate</TableHead>
-          <TableHead>Device</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {vehicles.map((vehicle) => (
-          <TableRow key={vehicle.id}>
-            <TableCell>{vehicle.name}</TableCell>
-            <TableCell>{vehicle.plate}</TableCell>
-            <TableCell>{vehicle.device?.name || 'No Device'}</TableCell>
-            <TableCell>
-              <Button onClick={() => onEditVehicle(vehicle)}>
-                Edit
-              </Button>
-            </TableCell>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nome</TableHead>
+            <TableHead>Placa</TableHead>
+            <TableHead>Dispositivo</TableHead>
+            <TableHead className="text-right">Ações</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {vehicles.map((vehicle) => (
+            <TableRow key={vehicle.id}>
+              <TableCell>{vehicle.name}</TableCell>
+              <TableCell>{vehicle.plate}</TableCell>
+              <TableCell>{vehicle.device?.name || 'Nenhum'}</TableCell>
+              <TableCell className="text-right">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEditVehicle(vehicle)}
+                >
+                  Editar
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

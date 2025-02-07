@@ -21,14 +21,14 @@ export function VehicleSearchFilter({
   return (
     <div className="flex space-x-2">
       <Input
-        placeholder="Search vehicles..."
+        placeholder="Pesquisar veículos..."
         value={searchTerm}
         onChange={(e) => handleSearchChange(e.target.value)}
         className="max-w-sm"
       />
 
       <Button onClick={onAddVehicle}>
-        Add Vehicle
+        Adicionar
       </Button>
     </div>
   );

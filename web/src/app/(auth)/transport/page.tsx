@@ -1,70 +1,72 @@
-'use client';
+"use client";
 
-import {useState} from 'react';
-import {Vehicle} from "@/lib/types";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
-import {useToast} from "@/hooks/use-toast";
-import {useCreateVehicle, useDeleteVehicle, useUpdateVehicle, useVehicles} from "@/lib/store/vehicle-store";
-import {Input} from "@/components/ui/input";
-import {Button} from "@/components/ui/button";
-import {VehicleForm} from "@/components/vehicle/vehicle-form";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {CreateVehicle} from "@/lib/clients/logi.types";
+import { useState } from "react";
+import { Vehicle } from "@/lib/types";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { useCreateVehicle, useDeleteVehicle, useUpdateVehicle, useVehicles } from "@/lib/store/vehicle-store";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { VehicleForm } from "@/components/vehicle/vehicle-form";
+import { CreateVehicle } from "@/lib/clients/logi.types";
+import { VehicleTable } from "@/components/vehicle/vehicle-table";
 
 export default function VehicleManagementPage() {
-  const {toast} = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
 
-  const {data: vehiclesPage, isLoading, isError} = useVehicles();
+  const { data: vehiclesPage, isLoading, isError } = useVehicles();
   const createVehicleMutation = useCreateVehicle();
   const updateVehicleMutation = useUpdateVehicle();
   const deleteVehicleMutation = useDeleteVehicle();
 
-  const filteredVehicles = vehiclesPage?.content.filter(vehicle =>
-    vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredVehicles =
+    vehiclesPage?.content.filter(
+      (vehicle) =>
+        vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
 
   const handleCreateVehicle = (data: CreateVehicle) => {
     createVehicleMutation.mutate(data, {
       onSuccess: (createdVehicle) => {
         toast({
-          title: "Vehicle Created",
-          description: `Vehicle ${createdVehicle.name} has been added.`
+          title: "Veículo criado",
+          description: `Veículo ${createdVehicle.name} foi adicionado.`,
         });
         setIsCreateModalOpen(false);
       },
       onError: (error) => {
         toast({
-          title: "Error Creating Vehicle",
+          title: "Erro ao criar veículo",
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
         });
-      }
+      },
     });
   };
 
   const handleUpdateVehicle = (data: Partial<Vehicle>) => {
     if (editingVehicle) {
       updateVehicleMutation.mutate(
-        {id: editingVehicle.id!, vehicle: data},
+        { id: editingVehicle.id!, vehicle: data },
         {
           onSuccess: (updatedVehicle) => {
             toast({
-              title: "Vehicle Updated",
-              description: `Vehicle ${updatedVehicle.name} has been updated.`
+              title: "Veículo atualizado",
+              description: `O veículo ${updatedVehicle.name} foi atualizado.`,
             });
             setEditingVehicle(null);
           },
           onError: (error) => {
             toast({
-              title: "Error Updating Vehicle",
+              title: "Erro atualizando veículo",
               description: error.message,
-              variant: "destructive"
+              variant: "destructive",
             });
-          }
+          },
         }
       );
     }
@@ -75,89 +77,49 @@ export default function VehicleManagementPage() {
       deleteVehicleMutation.mutate(editingVehicle.id!, {
         onSuccess: () => {
           toast({
-            title: "Vehicle Deleted",
-            description: `Vehicle ${editingVehicle.name} has been deleted.`
+            title: "Veículo deletado",
+            description: `O veículo ${editingVehicle.name} foi deletado.`,
           });
           setEditingVehicle(null);
         },
         onError: (error) => {
           toast({
-            title: "Error Deleting Vehicle",
+            title: "Erro deletando veículo",
             description: error.message,
-            variant: "destructive"
+            variant: "destructive",
           });
-        }
+        },
       });
     }
   };
 
-  if (isLoading) return <div>Loading vehicles...</div>;
-  if (isError) return <div>Error loading vehicles</div>;
+  if (isLoading) return <div>Carregando veículos...</div>;
+  if (isError) return <div>Erro ao carregar veículos</div>;
 
   return (
     <div className="container mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Vehicle Management</h1>
+      <h1 className="text-2xl font-bold">Gerenciamento de veículos</h1>
 
       <div className="flex justify-between items-center gap-4">
         <div className="flex-1">
           <Input
-            placeholder="Search vehicles by name or plate..."
+            placeholder="Buscar veículos por nome ou placa..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          Add Vehicle
-        </Button>
+        <Button onClick={() => setIsCreateModalOpen(true)}>Adicionar</Button>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Plate</TableHead>
-              <TableHead>Assigned Device</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredVehicles.map((vehicle) => (
-              <TableRow key={vehicle.id}>
-                <TableCell>{vehicle.name}</TableCell>
-                <TableCell>{vehicle.plate}</TableCell>
-                <TableCell>{vehicle.device?.name || 'None'}</TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingVehicle(vehicle)}
-                  >
-                    Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <VehicleTable vehicles={filteredVehicles} onEditVehicle={setEditingVehicle} />
 
-      <Dialog
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-      >
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Vehicle</DialogTitle>
-            <DialogDescription>
-              Enter the details for the new vehicle.
-            </DialogDescription>
+            <DialogTitle>Adicionar novo veículo</DialogTitle>
+            <DialogDescription>Digite os detalhes do novo veículo.</DialogDescription>
           </DialogHeader>
-          <VehicleForm
-            mode="create"
-            onSubmit={handleCreateVehicle}
-            isLoading={createVehicleMutation.isPending}
-          />
+          <VehicleForm mode="create" onSubmit={handleCreateVehicle} isLoading={createVehicleMutation.isPending} />
         </DialogContent>
       </Dialog>
 
@@ -169,20 +131,15 @@ export default function VehicleManagementPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Vehicle</DialogTitle>
-            <DialogDescription>
-              Modify the details for the selected vehicle.
-            </DialogDescription>
+            <DialogTitle>Editar veículo</DialogTitle>
+            <DialogDescription>Altere as informações do veículo selecionado.</DialogDescription>
           </DialogHeader>
           <VehicleForm
             mode="edit"
             initialData={editingVehicle || undefined}
             onUpdate={handleUpdateVehicle}
             onDelete={handleDeleteVehicle}
-            isLoading={
-              updateVehicleMutation.isPending ||
-              deleteVehicleMutation.isPending
-            }
+            isLoading={updateVehicleMutation.isPending || deleteVehicleMutation.isPending}
           />
         </DialogContent>
       </Dialog>
