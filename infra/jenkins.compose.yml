@@ -1,0 +1,25 @@
+name: iot-jenkins
+
+services:
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      JENKINS_OPTS: "--prefix=/jenkins"
+      JENKINS_SLAVE_AGENT_PORT: 50000
+    networks:
+      - iot-jenkins
+
+volumes:
+  jenkins_home:
+    name: iot-jenkins-home
+
+networks:
+  iot-jenkins:
+    name: iot-jenkins-network

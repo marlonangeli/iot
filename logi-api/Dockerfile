@@ -10,12 +10,10 @@ EXPOSE 8080
 
 # New Relic
 COPY --from=build /app/newrelic/newrelic.jar newrelic.jar
-COPY --from=build /app/newrelic/newrelic.yml newrelic.yml
-ARG NEW_RELIC_LICENSE_KEY
-ENV NEW_RELIC_LICENSE_KEY=$NEW_RELIC_LICENSE_KEY
-RUN sed -i "s/license_key: .*/license_key: '${NEW_RELIC_LICENSE_KEY}'/" newrelic.yml
 
 ARG COMMIT_HASH
 ENV COMMIT_HASH=$COMMIT_HASH
 
-ENTRYPOINT ["java", "-javaagent:newrelic.jar", "-jar", "logi-api.jar"]
+ENV SPRING_PROFILES_ACTIVE=production
+
+ENTRYPOINT [ "sh", "-c", "java -javaagent:newrelic.jar -Dnewrelic.environment=${SPRING_PROFILES_ACTIVE} -Dnewrelic.config.file=/app/newrelic.yml -jar logi-api.jar" ]

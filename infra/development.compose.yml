@@ -1,6 +1,22 @@
 name: iot-development
 
 services:
+  logi-web:
+    container_name: logi-web-dev
+    build:
+      context: ../web/
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_AUTH_API_URL: ${AUTH_API_URL}
+        NEXT_PUBLIC_LOGI_API_URL: ${LOGI_API_URL}
+        NEXT_PUBLIC_EVENT_API_URL: ${EVENT_API_URL}
+    env_file:
+      - development.env
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+
   logi-api:
     container_name: logi-api-dev
     build:
@@ -8,13 +24,14 @@ services:
       dockerfile: Dockerfile
       args:
         COMMIT_HASH: ${COMMIT_HASH}
-        NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
     env_file:
       - development.env
     environment:
       SPRING_PROFILES_ACTIVE: development
     ports:
       - "8080:8080"
+    volumes:
+      - ./newrelic.yml:/app/newrelic.yml:ro
     depends_on:
       postgres:
         condition: service_healthy
