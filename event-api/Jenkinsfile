@@ -1,0 +1,89 @@
+pipeline {
+  agent any
+  
+  // Define environment variables
+  environment {
+    DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
+    DOCKERHUB_REPO = "iot"
+    DOCKERHUB_REPO_TAG = "event-api"
+    COMMIT_HASH = ""
+  }
+  
+  options {
+    // Prevents an automatic checkout if you want to control it explicitly
+    skipDefaultCheckout(true)
+  }
+  
+  stages {
+    stage('Checkout') {
+      steps {
+        // Checkout the repo
+        checkout scm
+        script {
+          // Get a short commit hash for tagging
+          def hash = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+          env.COMMIT_HASH = hash
+          echo "Building commit: ${env.COMMIT_HASH}"
+        }
+      }
+    }
+    
+    stage('Check for Changes') {
+      // This stage only runs if there are changes in event-api/
+      when {
+        changeset glob: "event-api/**"
+      }
+      steps {
+        echo "Changes detected in event-api – proceeding with build."
+      }
+    }
+    
+    stage('Build and Push Image') {
+      // If no changes, this stage is skipped
+      when {
+        changeset glob: "event-api/**"
+      }
+      steps {
+        script {
+          sh """
+            export COMMIT_HASH=${env.COMMIT_HASH}
+            docker compose -f infra/production.compose.yml build event-api
+          """
+          
+          // Tag the built image with the commit hash
+          sh "docker tag event-api ${DOCKERHUB_REPO}:${DOCKERHUB_REPO_TAG}${env.COMMIT_HASH}"
+          sh "docker tag event-api ${DOCKERHUB_REPO}:${DOCKERHUB_REPO_TAG}-latest"
+          
+          // Login to Docker Hub using credentials stored in Jenkins (ID: dockerhub-creds)
+            withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS, usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_ACCESS_TOKEN')]) {
+            sh "echo ${DOCKERHUB_ACCESS_TOKEN} | docker login -u ${DOCKERHUB_USER} --password-stdin"
+          }
+          
+          // Push the tagged image to Docker Hub
+          sh "docker push ${DOCKERHUB_REPO}:${env.COMMIT_HASH}"
+          sh "docker push ${DOCKERHUB_REPO}:${DOCKERHUB_REPO_TAG}-latest"
+        }
+      }
+    }
+    
+    stage('Deploy') {
+      when {
+        changeset glob: "event-api/**"
+      }
+      steps {
+        script {
+          sh "docker-compose -f infra/prod.compose.yml up -d event-api"
+        }
+      }
+    }
+  }
+  
+  post {
+    failure {
+      echo 'The pipeline failed.'
+    }
+    success {
+      echo 'Pipeline completed successfully.'
+    }
+  }
+}
