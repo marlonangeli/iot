@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
     let response = {
         status: "healthy",
         uptime: process.uptime(),
-        api_version: "1.0",
+        api_version: "1.1", // Change API version to force trigger to Jenkins
         commit_hash: env.COMMIT_HASH || "development",
         services: {},
         updated_at: new Date().toISOString()

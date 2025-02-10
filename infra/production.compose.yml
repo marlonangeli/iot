@@ -1,0 +1,35 @@
+name: iot-production
+
+services:
+  event-api:
+    container_name: event-api-prod
+    image: marlonangeli/iot:event-api-latest
+    build:
+      context: ../event-api/
+      dockerfile: Dockerfile
+      args:
+        COMMIT_HASH: ${COMMIT_HASH}
+      tags:
+        - event-api-latest
+        - event-api-${COMMIT_HASH}
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      NEW_RELIC_APP_NAME: "event-api (prod)"
+    ports:
+      - "8000:8000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.logi-api.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/event`)"
+      - "traefik.http.routers.logi-api.middlewares=strip-prefix"
+      - "traefik.middlewares.strip-prefix.stripprefix.prefixes=/event"
+      - "traefik.http.routers.logi-api.entrypoints=websecure"
+      - "traefik.http.routers.logi-api.tls=true"
+      - "traefik.http.services.logi-api.loadbalancer.server.port=8080" 
+    networks:
+      - traefik-network
+
+networks:
+  traefik-network:
+    external: true
