@@ -31,7 +31,7 @@ pipeline {
     stage('Check for Changes') {
       // This stage only runs if there are changes in event-api/
       when {
-        changeset glob: "event-api/**"
+        changeset pattern: "event-api/**"
       }
       steps {
         echo "Changes detected in event-api – proceeding with build."
@@ -41,7 +41,7 @@ pipeline {
     stage('Build and Push Image') {
       // If no changes, this stage is skipped
       when {
-        changeset glob: "event-api/**"
+        changeset pattern: "event-api/**"
       }
       steps {
         script {
@@ -68,7 +68,7 @@ pipeline {
     
     stage('Deploy') {
       when {
-        changeset glob: "event-api/**"
+        changeset pattern: "event-api/**"
       }
       steps {
         script {
