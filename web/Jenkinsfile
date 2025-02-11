@@ -3,7 +3,7 @@ pipeline {
   
   environment {
     DOCKERHUB_REPO = "marlonangeli/iot"
-    DOCKERHUB_REPO_TAG = "event-api"
+    DOCKERHUB_REPO_TAG = "logi-web"
   }
   
   options {
@@ -26,12 +26,12 @@ pipeline {
     stage('Build and Push Image') {
       steps {
         script {
-          withCredentials([file(credentialsId: 'dotenv', variable: 'dotenv')]) {
-            sh "cp ${dotenv} infra/.env"
+          withCredentials([file(credentialsId: 'web_dotenv', variable: 'web_dotenv')]) {
+            sh "cp ${web_dotenv} web/.env"
             
             sh """
               export COMMIT_HASH=${COMMIT_HASH}
-              docker compose --file infra/production.compose.yml --env-file infra/.env build event-api
+              docker compose --file infra/production.compose.yml --env-file web/.env build logi-web
             """
           }
           
@@ -50,7 +50,7 @@ pipeline {
     stage('Deploy') {
       steps {
         script {
-          sh "docker compose --file infra/production.compose.yml --env-file infra/.env up -d event-api"
+          sh "docker compose --file infra/production.compose.yml --env-file web/.env up -d logi-web"
         }
       }
     }
