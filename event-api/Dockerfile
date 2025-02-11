@@ -2,8 +2,9 @@ ARG NODE_VERSION=22.6.0
 
 FROM node:${NODE_VERSION}-slim AS base
 WORKDIR /app
-ENV NODE_ENV=production
-ENV DOCKER=true
+ENV NODE_ENV production
+ENV DOCKER true
+ENV PORT 8000
 
 FROM base AS deps
 COPY package.json package-lock.json ./
@@ -21,7 +22,6 @@ COPY --from=builder /app/dist /app
 RUN chown -R node:node /app && chmod -R 755 /app
 USER node
 
-ENV PORT 8000
 EXPOSE 8000
 
 CMD ["node", "server.js"]
