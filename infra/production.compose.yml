@@ -1,6 +1,65 @@
 name: iot-production
 
 services:
+  logi-web:
+    container_name: logi-web-prod
+    image: marlonangeli/iot:logi-web-latest
+    build:
+      context: ../logi-web/
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_AUTH_API_URL: ${AUTH_API_URL}
+        NEXT_PUBLIC_LOGI_API_URL: ${LOGI_API_URL}
+        NEXT_PUBLIC_EVENT_API_URL: ${EVENT_API_URL}
+      tags:
+        - marlonangeli/iot:logi-web-${COMMIT_HASH}
+        - marlonangeli/iot:logi-web-latest
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_AUTH_API_URL: ${AUTH_API_URL}
+      NEXT_PUBLIC_LOGI_API_URL: ${LOGI_API_URL}
+      NEXT_PUBLIC_EVENT_API_URL: ${EVENT_API_URL}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.logi-web.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/`)"
+      - "traefik.http.routers.logi-web.entrypoints=websecure"
+      - "traefik.http.routers.logi-web.tls=true"
+      - "traefik.http.services.logi-web.loadbalancer.server.port=3000"
+    networks:
+      - traefik-network
+
+
+  logi-api:
+    container_name: logi-api-prod
+    image: marlonangeli/iot:logi-api-latest
+    build:
+      context: ../logi-api/
+      dockerfile: Dockerfile
+      args:
+        COMMIT_HASH: ${COMMIT_HASH}
+      tags:
+        - marlonangeli/iot:logi-api-${COMMIT_HASH}
+        - marlonangeli/iot:logi-api-latest
+    env_file:
+      - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.logi-api.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/logi`)"
+      - "traefik.http.routers.logi-api.middlewares=strip-prefix"
+      - "traefik.middlewares.strip-prefix.stripprefix.prefixes=/logi"
+      - "traefik.http.routers.logi-api.entrypoints=websecure"
+      - "traefik.http.routers.logi-api.tls=true"
+      - "traefik.http.services.logi-api.loadbalancer.server.port=8080"
+    volumes:
+      - ./newrelic.yml:/app/newrelic.yml:ro
+    networks:
+      - traefik-network
+
+
   event-api:
     container_name: event-api-prod
     image: marlonangeli/iot:event-api-latest
@@ -10,15 +69,13 @@ services:
       args:
         COMMIT_HASH: ${COMMIT_HASH}
       tags:
-        - event-api-latest
-        - event-api-${COMMIT_HASH}
+        - marlonangeli/iot:event-api-${COMMIT_HASH}
+        - marlonangeli/iot:event-api-latest
     env_file:
       - .env
     environment:
       NODE_ENV: production
       NEW_RELIC_APP_NAME: "event-api (prod)"
-    ports:
-      - "8000:8000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.logi-api.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/event`)"
@@ -26,9 +83,35 @@ services:
       - "traefik.middlewares.strip-prefix.stripprefix.prefixes=/event"
       - "traefik.http.routers.logi-api.entrypoints=websecure"
       - "traefik.http.routers.logi-api.tls=true"
-      - "traefik.http.services.logi-api.loadbalancer.server.port=8080" 
+      - "traefik.http.services.logi-api.loadbalancer.server.port=8000" 
     networks:
       - traefik-network
+
+
+  auth:
+    container_name: auth-prod
+    image: marlonangeli/iot:auth-latest
+    build:
+      context: ../auth/
+      dockerfile: Dockerfile
+      args:
+        COMMIT_HASH: ${COMMIT_HASH}
+      tags:
+        - marlonangeli/iot:auth-${COMMIT_HASH}
+        - marlonangeli/iot:auth-latest
+    env_file:
+      - .env
+    environment:
+      GIN_MODE: release
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/auth`)"
+      - "traefik.http.routers.auth.middlewares=strip-prefix"
+      - "traefik.middlewares.strip-prefix.stripprefix.prefixes=/auth"
+      - "traefik.http.routers.auth.entrypoints=websecure"
+      - "traefik.http.routers.auth.tls=true"
+      - "traefik.http.services.auth.loadbalancer.server.port=8080"
+
 
 networks:
   traefik-network:
