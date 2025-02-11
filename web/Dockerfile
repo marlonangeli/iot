@@ -79,6 +79,7 @@ ENV NEXT_PUBLIC_EVENT_API_URL=${NEXT_PUBLIC_EVENT_API_URL}
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
 
-# Note: Don't expose ports here, Compose will handle that for us
+ENV PORT 3000
+EXPOSE 3000
 
 CMD ["node", "server.js"]

@@ -15,7 +15,7 @@ services:
         - marlonangeli/iot:logi-web-${COMMIT_HASH}
         - marlonangeli/iot:logi-web-latest
     env_file:
-      - .env
+      - ../web/.env
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_AUTH_API_URL: ${AUTH_API_URL}
@@ -26,10 +26,10 @@ services:
       - "traefik.http.routers.logi-web.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/`)"
       - "traefik.http.routers.logi-web.entrypoints=websecure"
       - "traefik.http.routers.logi-web.tls=true"
+      - "traefik.http.routers.service=logi-web"
       - "traefik.http.services.logi-web.loadbalancer.server.port=3000"
     networks:
       - traefik-network
-
 
   logi-api:
     container_name: logi-api-prod
@@ -49,16 +49,16 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.logi-api.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/logi`)"
-      - "traefik.http.routers.logi-api.middlewares=strip-prefix"
-      - "traefik.middlewares.strip-prefix.stripprefix.prefixes=/logi"
+      - "traefik.middlewares.logi-strip-prefix.stripprefix.prefixes=/logi"
+      - "traefik.http.routers.logi-api.middlewares=logi-strip-prefix"
       - "traefik.http.routers.logi-api.entrypoints=websecure"
       - "traefik.http.routers.logi-api.tls=true"
+      - "traefik.http.routers.service=logi-api"
       - "traefik.http.services.logi-api.loadbalancer.server.port=8080"
     volumes:
       - ./newrelic.yml:/app/newrelic.yml:ro
     networks:
       - traefik-network
-
 
   event-api:
     container_name: event-api-prod
@@ -78,15 +78,15 @@ services:
       NEW_RELIC_APP_NAME: "event-api (prod)"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.logi-api.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/event`)"
-      - "traefik.http.routers.logi-api.middlewares=strip-prefix"
-      - "traefik.middlewares.strip-prefix.stripprefix.prefixes=/event"
-      - "traefik.http.routers.logi-api.entrypoints=websecure"
-      - "traefik.http.routers.logi-api.tls=true"
-      - "traefik.http.services.logi-api.loadbalancer.server.port=8000" 
+      - "traefik.http.routers.event-api.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/event`)"
+      - "traefik.middlewares.event-strip-prefix.stripprefix.prefixes=/event"
+      - "traefik.http.routers.event-api.middlewares=event-strip-prefix"
+      - "traefik.http.routers.event-api.entrypoints=websecure"
+      - "traefik.http.routers.event-api.tls=true"
+      - "traefik.http.routers.service=event-api"
+      - "traefik.http.services.event-api.loadbalancer.server.port=8000"
     networks:
       - traefik-network
-
 
   auth:
     container_name: auth-prod
@@ -106,12 +106,12 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/auth`)"
-      - "traefik.http.routers.auth.middlewares=strip-prefix"
-      - "traefik.middlewares.strip-prefix.stripprefix.prefixes=/auth"
+      - "traefik.middlewares.auth-strip-prefix.stripprefix.prefixes=/auth"
+      - "traefik.http.routers.auth.middlewares=auth-strip-prefix"
       - "traefik.http.routers.auth.entrypoints=websecure"
       - "traefik.http.routers.auth.tls=true"
-      - "traefik.http.services.auth.loadbalancer.server.port=8080"
-
+      - "traefik.http.routers.service=auth"
+      - "traefik.http.services.auth.loadbalancer.server.port=5000"
 
 networks:
   traefik-network:
