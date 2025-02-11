@@ -27,11 +27,11 @@ pipeline {
       steps {
         script {
           withCredentials([file(credentialsId: 'web_dotenv', variable: 'web_dotenv')]) {
-            sh "cp ${web_dotenv} web/.env"
+            sh "cp ${web_dotenv} infra/.env"
             
             sh """
               export COMMIT_HASH=${COMMIT_HASH}
-              docker compose --file infra/production.compose.yml --env-file web/.env build logi-web
+              docker compose --file infra/production.compose.yml --env-file infra/.env build logi-web
             """
           }
           
@@ -50,7 +50,7 @@ pipeline {
     stage('Deploy') {
       steps {
         script {
-          sh "docker compose --file infra/production.compose.yml --env-file web/.env up -d logi-web"
+          sh "docker compose --file infra/production.compose.yml --env-file infra/.env up -d logi-web"
         }
       }
     }
