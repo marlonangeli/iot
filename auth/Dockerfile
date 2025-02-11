@@ -21,10 +21,10 @@ FROM alpine:3.21 AS final
 
 RUN --mount=type=cache,target=/var/cache/apk \
     apk --update add \
-        ca-certificates \
-        tzdata \
-        && \
-        update-ca-certificates
+    ca-certificates \
+    tzdata \
+    && \
+    update-ca-certificates
 
 # Create a non-privileged user that the app will run under.
 ARG UID=10001
@@ -40,6 +40,7 @@ USER appuser
 
 COPY --from=build /bin/server /bin/
 
+ENV PORT 5000
 EXPOSE 5000
 
 ENTRYPOINT [ "/bin/server" ]

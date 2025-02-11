@@ -6,6 +6,8 @@ RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests
 FROM eclipse-temurin:23-jre-alpine AS final
 WORKDIR /app
 COPY --from=build /app/target/logi-*.jar logi-api.jar
+
+ENV PORT 8080
 EXPOSE 8080
 
 # New Relic

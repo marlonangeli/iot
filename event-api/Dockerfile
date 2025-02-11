@@ -14,12 +14,14 @@ FROM base AS builder
 COPY . .
 COPY --from=deps /app/node_modules ./node_modules
 RUN npm install -g esbuild \
-        && esbuild src/server.js --bundle --minify --platform=node --outfile=dist/server.js
+    && esbuild src/server.js --bundle --minify --platform=node --outfile=dist/server.js
 
 FROM base
 COPY --from=builder /app/dist /app
 RUN chown -R node:node /app && chmod -R 755 /app
 USER node
 
+ENV PORT 8000
 EXPOSE 8000
+
 CMD ["node", "server.js"]
