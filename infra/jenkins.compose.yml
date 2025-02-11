@@ -3,23 +3,31 @@ name: iot-jenkins
 services:
   jenkins:
     container_name: jenkins
-    image: jenkins/jenkins:lts
-    ports:
-      - "8080:8080"
-      - "50000:50000"
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      # - /usr/bin/docker:/usr/bin/docker
+    user: "root"
     environment:
       JENKINS_OPTS: "--prefix=/jenkins"
-      JENKINS_SLAVE_AGENT_PORT: 50000
+      TZ: America/Sao_Paulo
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jenkins.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/jenkins`)"
+      - "traefik.http.routers.jenkins.entrypoints=websecure"
+      - "traefik.http.routers.jenkins.tls=true"
+      - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
     networks:
-      - iot-jenkins
+      - traefik-network
+
 
 volumes:
   jenkins_home:
     name: iot-jenkins-home
 
 networks:
-  iot-jenkins:
-    name: iot-jenkins-network
+  traefik-network:
+    external: true

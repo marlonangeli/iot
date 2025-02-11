@@ -1,0 +1,71 @@
+pipeline {
+  agent any
+  
+  environment {
+    DOCKERHUB_REPO = "marlonangeli/iot"
+    DOCKERHUB_REPO_TAG = "logi-api"
+  }
+  
+  options {
+    skipDefaultCheckout(true)
+  }
+  
+  stages {
+    stage('Checkout') {
+      steps {
+        // git branch: 'main', url: 'https://github.com/marlonangeli/iot.git'
+        checkout scm
+
+        script {
+          COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+          echo "Building commit: ${COMMIT_HASH}"
+        }
+      }
+    }
+    
+    stage('Build and Push Image') {
+      steps {
+        script {
+          withCredentials([file(credentialsId: 'newrelic', variable: 'newrelic')]) {
+            sh "cp ${newrelic} infra/newrelic.yml"
+          }
+
+          withCredentials([file(credentialsId: 'dotenv', variable: 'dotenv')]) {
+            sh "cp ${dotenv} infra/.env"
+            
+            sh """
+              export COMMIT_HASH=${COMMIT_HASH}
+              docker compose --file infra/production.compose.yml --env-file infra/.env build logi-api
+            """
+          }
+          
+          // Login to Docker Hub
+          withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_ACCESS_TOKEN')]) {
+            sh """
+              echo ${DOCKERHUB_ACCESS_TOKEN} | docker login -u ${DOCKERHUB_USER} --password-stdin
+              docker push ${DOCKERHUB_REPO}:${DOCKERHUB_REPO_TAG}-${COMMIT_HASH}
+              docker push ${DOCKERHUB_REPO}:${DOCKERHUB_REPO_TAG}-latest
+            """
+          }
+        }
+      }
+    }
+    
+    stage('Deploy') {
+      steps {
+        script {
+          sh "docker compose --file infra/production.compose.yml --env-file infra/.env up -d logi-api"
+        }
+      }
+    }
+  }
+  
+  post {
+    failure {
+      echo 'The pipeline failed.'
+    }
+    success {
+      echo 'Pipeline completed successfully.'
+    }
+  }
+}
