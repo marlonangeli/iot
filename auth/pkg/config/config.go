@@ -38,7 +38,7 @@ func LoadConfig(envPath ...string) (Config, error) {
 		SupabaseURL:   os.Getenv("SUPABASE_URL"),
 		SupabaseKey:   os.Getenv("SUPABASE_SERVICE_ROLE_KEY"),
 		JWTSecret:     os.Getenv("JWT_SECRET"),
-		Port:          os.Getenv("PORT"),
+		Port:          os.Getenv("AUTH_PORT"),
 		AdminEmail:    os.Getenv("ADMIN_EMAIL"),
 		AdminPassword: os.Getenv("ADMIN_PASSWORD"),
 	}, nil
