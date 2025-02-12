@@ -103,6 +103,7 @@ services:
       - .env
     environment:
       GIN_MODE: release
+      PORT: ${AUTH_PORT}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.auth.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/auth`)"
@@ -112,6 +113,8 @@ services:
       - "traefik.http.routers.auth.tls=true"
       - "traefik.http.routers.service=auth"
       - "traefik.http.services.auth.loadbalancer.server.port=5000"
+    networks:
+      - traefik-network
 
 networks:
   traefik-network:
