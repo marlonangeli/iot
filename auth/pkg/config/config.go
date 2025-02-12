@@ -54,5 +54,7 @@ func (c Config) Validate() error {
 	if c.JWTSecret == "" {
 		return fmt.Errorf("JWT_SECRET must be set")
 	}
+
+    log.Println("Config is valid")
 	return nil
 }
