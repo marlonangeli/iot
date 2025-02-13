@@ -1,4 +1,4 @@
-import axios, {AxiosError, AxiosInstance} from 'axios';
+import axios, { AxiosError, AxiosInstance } from "axios";
 import {
   Device,
   DeviceSchema,
@@ -11,10 +11,10 @@ import {
   Transaction,
   TransactionSchema,
   Vehicle,
-  VehicleSchema
+  VehicleSchema,
 } from "@/lib/types";
-import {env} from "@/lib/env";
-import {CreateVehicle, CreateVehicleSchema} from "@/lib/clients/logi.types";
+// import { env } from "@/lib/env";
+import { CreateVehicle, CreateVehicleSchema } from "@/lib/clients/logi.types";
 
 interface ProblemDetail {
   type: string;
@@ -36,13 +36,9 @@ class ApiError extends Error {
   public readonly status?: number;
   public readonly errors?: Record<string, string>;
 
-  constructor(
-    message: string,
-    status?: number,
-    errors?: Record<string, string>
-  ) {
+  constructor(message: string, status?: number, errors?: Record<string, string>) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.errors = errors;
   }
@@ -53,39 +49,31 @@ class ApiError extends Error {
   }
 }
 
-
 function handleApiError(error: AxiosError): never {
   if (error.response?.data && (error.response.data as ProblemDetail).status) {
     const problemDetail = error.response.data as ProblemDetail;
     throw new ApiError(
       problemDetail.title,
       problemDetail.status,
-      problemDetail.detail ? {detail: problemDetail.detail} : undefined
+      problemDetail.detail ? { detail: problemDetail.detail } : undefined
     );
   }
 
   if (error.response?.data && (error.response.data as ValidationError).errors) {
     const validationError = error.response.data as ValidationError;
-    throw new ApiError(
-      validationError.message,
-      400,
-      validationError.errors
-    );
+    throw new ApiError(validationError.message, 400, validationError.errors);
   }
 
-  throw new ApiError(
-    error.message,
-    error.response?.status
-  );
+  throw new ApiError(error.message, error.response?.status);
 }
 
 interface StatusVersion {
-  status: 'OK' | 'ERROR';
+  status: "OK" | "ERROR";
   version: string | null;
 }
 
 interface StatusResponse {
-  status: 'OK' | 'WARNING';
+  status: "OK" | "WARNING";
   database: StatusVersion;
   messageBroker: StatusVersion;
   commitHash: string;
@@ -97,7 +85,7 @@ export const createApiClient = (baseURL: string) => {
     baseURL,
     timeout: 10000,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   });
 
@@ -109,12 +97,12 @@ export const createApiClient = (baseURL: string) => {
        */
       get: async (): Promise<StatusResponse> => {
         try {
-          const response = await apiClient.get('/api/status');
+          const response = await apiClient.get("/api/status");
           return response.data as StatusResponse;
         } catch (error) {
           return handleApiError(error as AxiosError);
         }
-      }
+      },
     },
 
     devices: {
@@ -126,11 +114,11 @@ export const createApiClient = (baseURL: string) => {
        */
       list: async (page = 0, size = 10): Promise<Pageable<Device>> => {
         try {
-          const response = await apiClient.get('/api/devices', {params: {page, size}});
+          const response = await apiClient.get("/api/devices", { params: { page, size } });
           const pageable = PageableSchema.parse(response.data);
           return {
             ...pageable,
-            content: DeviceSchema.array().parse(pageable.content)
+            content: DeviceSchema.array().parse(pageable.content),
           };
         } catch (error) {
           return handleApiError(error as AxiosError);
@@ -158,8 +146,8 @@ export const createApiClient = (baseURL: string) => {
        */
       create: async (data: Device): Promise<Device> => {
         try {
-          const validatedData = DeviceSchema.omit({id: true}).parse(data);
-          const response = await apiClient.post('/api/devices', validatedData);
+          const validatedData = DeviceSchema.omit({ id: true }).parse(data);
+          const response = await apiClient.post("/api/devices", validatedData);
           return DeviceSchema.parse(response.data);
         } catch (error) {
           return handleApiError(error as AxiosError);
@@ -174,7 +162,7 @@ export const createApiClient = (baseURL: string) => {
        */
       update: async (id: number, data: Device): Promise<Device> => {
         try {
-          const validatedData = DeviceSchema.omit({id: true}).parse(data);
+          const validatedData = DeviceSchema.omit({ id: true }).parse(data);
           const response = await apiClient.put(`/api/devices/${id}`, validatedData);
           return DeviceSchema.parse(response.data);
         } catch (error) {
@@ -192,7 +180,7 @@ export const createApiClient = (baseURL: string) => {
         } catch (error) {
           handleApiError(error as AxiosError);
         }
-      }
+      },
     },
 
     // Drivers endpoint
@@ -204,11 +192,11 @@ export const createApiClient = (baseURL: string) => {
        */
       list: async (page = 0, size = 10): Promise<Pageable<Driver>> => {
         try {
-          const response = await apiClient.get('/api/drivers', {params: {page, size}});
+          const response = await apiClient.get("/api/drivers", { params: { page, size } });
           const pageable = PageableSchema.parse(response.data);
           return {
             ...pageable,
-            content: DriverSchema.array().parse(pageable.content)
+            content: DriverSchema.array().parse(pageable.content),
           };
         } catch (error) {
           return handleApiError(error as AxiosError);
@@ -234,8 +222,8 @@ export const createApiClient = (baseURL: string) => {
        */
       create: async (data: Driver): Promise<Driver> => {
         try {
-          const validatedData = DriverSchema.omit({id: true}).parse(data);
-          const response = await apiClient.post('/api/drivers', validatedData);
+          const validatedData = DriverSchema.omit({ id: true }).parse(data);
+          const response = await apiClient.post("/api/drivers", validatedData);
           return DriverSchema.parse(response.data);
         } catch (error) {
           return handleApiError(error as AxiosError);
@@ -249,7 +237,7 @@ export const createApiClient = (baseURL: string) => {
        */
       update: async (id: number, data: Driver): Promise<Driver> => {
         try {
-          const validatedData = DriverSchema.omit({id: true}).parse(data);
+          const validatedData = DriverSchema.omit({ id: true }).parse(data);
           const response = await apiClient.put(`/api/drivers/${id}`, validatedData);
           return DriverSchema.parse(response.data);
         } catch (error) {
@@ -267,7 +255,7 @@ export const createApiClient = (baseURL: string) => {
         } catch (error) {
           handleApiError(error as AxiosError);
         }
-      }
+      },
     },
 
     // Locations endpoint
@@ -279,11 +267,11 @@ export const createApiClient = (baseURL: string) => {
        */
       list: async (page = 0, size = 10): Promise<Pageable<Location>> => {
         try {
-          const response = await apiClient.get('/api/locations', {params: {page, size}});
+          const response = await apiClient.get("/api/locations", { params: { page, size } });
           const pageable = PageableSchema.parse(response.data);
           return {
             ...pageable,
-            content: LocationSchema.array().parse(pageable.content)
+            content: LocationSchema.array().parse(pageable.content),
           };
         } catch (error) {
           return handleApiError(error as AxiosError);
@@ -309,8 +297,8 @@ export const createApiClient = (baseURL: string) => {
        */
       create: async (data: Location): Promise<Location> => {
         try {
-          const validatedData = LocationSchema.omit({id: true}).parse(data);
-          const response = await apiClient.post('/api/locations', validatedData);
+          const validatedData = LocationSchema.omit({ id: true }).parse(data);
+          const response = await apiClient.post("/api/locations", validatedData);
           return LocationSchema.parse(response.data);
         } catch (error) {
           return handleApiError(error as AxiosError);
@@ -324,7 +312,7 @@ export const createApiClient = (baseURL: string) => {
        */
       update: async (id: number, data: Location): Promise<Location> => {
         try {
-          const validatedData = LocationSchema.omit({id: true}).parse(data);
+          const validatedData = LocationSchema.omit({ id: true }).parse(data);
           const response = await apiClient.put(`/api/locations/${id}`, validatedData);
           return LocationSchema.parse(response.data);
         } catch (error) {
@@ -342,7 +330,7 @@ export const createApiClient = (baseURL: string) => {
         } catch (error) {
           handleApiError(error as AxiosError);
         }
-      }
+      },
     },
 
     // Transactions endpoint
@@ -354,11 +342,11 @@ export const createApiClient = (baseURL: string) => {
        */
       list: async (page = 0, size = 10): Promise<Pageable<Transaction>> => {
         try {
-          const response = await apiClient.get('/api/transactions', {params: {page, size}});
+          const response = await apiClient.get("/api/transactions", { params: { page, size } });
           const pageable = PageableSchema.parse(response.data);
           return {
             ...pageable,
-            content: TransactionSchema.array().parse(pageable.content)
+            content: TransactionSchema.array().parse(pageable.content),
           };
         } catch (error) {
           return handleApiError(error as AxiosError);
@@ -384,8 +372,8 @@ export const createApiClient = (baseURL: string) => {
        */
       create: async (data: Transaction): Promise<Transaction> => {
         try {
-          const validatedData = TransactionSchema.omit({id: true}).parse(data);
-          const response = await apiClient.post('/api/transactions', validatedData);
+          const validatedData = TransactionSchema.omit({ id: true }).parse(data);
+          const response = await apiClient.post("/api/transactions", validatedData);
           return TransactionSchema.parse(response.data);
         } catch (error) {
           return handleApiError(error as AxiosError);
@@ -399,7 +387,7 @@ export const createApiClient = (baseURL: string) => {
        */
       update: async (id: number, data: Transaction): Promise<Transaction> => {
         try {
-          const validatedData = TransactionSchema.omit({id: true}).parse(data);
+          const validatedData = TransactionSchema.omit({ id: true }).parse(data);
           const response = await apiClient.put(`/api/transactions/${id}`, validatedData);
           return TransactionSchema.parse(response.data);
         } catch (error) {
@@ -417,7 +405,7 @@ export const createApiClient = (baseURL: string) => {
         } catch (error) {
           handleApiError(error as AxiosError);
         }
-      }
+      },
     },
 
     // Vehicles endpoint
@@ -429,11 +417,11 @@ export const createApiClient = (baseURL: string) => {
        */
       list: async (page = 0, size = 10): Promise<Pageable<Vehicle>> => {
         try {
-          const response = await apiClient.get('/api/vehicles', {params: {page, size}});
+          const response = await apiClient.get("/api/vehicles", { params: { page, size } });
           const pageable = PageableSchema.parse(response.data);
           return {
             ...pageable,
-            content: VehicleSchema.array().parse(pageable.content)
+            content: VehicleSchema.array().parse(pageable.content),
           };
         } catch (error) {
           return handleApiError(error as AxiosError);
@@ -461,7 +449,7 @@ export const createApiClient = (baseURL: string) => {
         try {
           const validatedData = CreateVehicleSchema.parse(data);
 
-          const response = await apiClient.post('/api/vehicles', validatedData);
+          const response = await apiClient.post("/api/vehicles", validatedData);
           return VehicleSchema.parse(response.data);
         } catch (error) {
           return handleApiError(error as AxiosError);
@@ -476,7 +464,7 @@ export const createApiClient = (baseURL: string) => {
       update: async (id: number, data: Partial<Vehicle>): Promise<Vehicle> => {
         try {
           console.log(data);
-          const validatedData = VehicleSchema.omit({id: true}).parse(data);
+          const validatedData = VehicleSchema.omit({ id: true }).parse(data);
           const response = await apiClient.put(`/api/vehicles/${id}`, validatedData);
           return VehicleSchema.parse(response.data);
         } catch (error) {
@@ -494,9 +482,9 @@ export const createApiClient = (baseURL: string) => {
         } catch (error) {
           handleApiError(error as AxiosError);
         }
-      }
+      },
     },
   };
 };
 
-export const logiApi = createApiClient(env.NEXT_PUBLIC_LOGI_API_URL);
+export const logiApi = createApiClient(process.env.NEXT_PUBLIC_LOGI_API_URL || "");
