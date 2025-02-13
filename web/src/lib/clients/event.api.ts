@@ -1,6 +1,6 @@
 import { Event } from "@/lib/types";
 import axios from "axios";
-import { env } from "@/lib/env";
+// import { env } from "@/lib/env";
 
 const createApiClient = (baseURL: string) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -60,4 +60,4 @@ const createApiClient = (baseURL: string) => {
   }
 };
 
-export const eventApi = createApiClient(env.NEXT_PUBLIC_EVENT_API_URL || "");
+export const eventApi = createApiClient(process.env.NEXT_PUBLIC_EVENT_API_URL || "");
