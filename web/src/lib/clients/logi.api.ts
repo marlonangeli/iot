@@ -13,28 +13,13 @@ import {
   VehicleSchema,
 } from "@/lib/types";
 import { CreateVehicle, CreateVehicleSchema } from "@/lib/clients/logi.types";
-import {createApiClient, handleApiError, StatusResponse} from "@/lib/clients/base-client";
+import {createApiClient, handleApiError} from "@/lib/clients/base-client";
 import {AxiosError} from "axios";
 
 export const ApiClient = () => {
   const apiClient = createApiClient(process.env.NEXT_PUBLIC_LOGI_API_URL as string);
 
   return {
-    status: {
-      /**
-       * Get system status and versions
-       * @returns System status details
-       */
-      get: async (): Promise<StatusResponse> => {
-        try {
-          const response = await apiClient.get("/api/status");
-          return response.data as StatusResponse;
-        } catch (error) {
-          return handleApiError(error as AxiosError);
-        }
-      },
-    },
-
     devices: {
       /**
        * List devices with pagination
