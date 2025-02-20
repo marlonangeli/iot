@@ -9,5 +9,4 @@ router.use('/status', status);
 router.use('/devices', devices);
 router.use('/events', events);
 
-
 export default router;

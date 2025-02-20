@@ -7,6 +7,7 @@ const QUEUE_NAME = 'iot_events_queue';
 // POST: Publish a message
 router.post('/', async (req, res) => {
     try {
+
         const messageId = await rabbitMQ.publish(QUEUE_NAME, req.body);
         res.status(201).json({
             message: 'Event published successfully',
@@ -18,28 +19,30 @@ router.post('/', async (req, res) => {
     }
 });
 
-// GET: Stream messages in real-time
+// GET: Stream messages in real-time (NDJSON)
+// A dedicated consumer channel is created and canceled on client disconnect.
 router.get('/stream', async (req, res) => {
     res.setHeader('Content-Type', 'application/x-ndjson');
     res.setHeader('Transfer-Encoding', 'chunked');
 
-    let clientClosed = false;
-
-    const handleClientClose = async () => {
-        clientClosed = true;
-        console.log('Client disconnected');
-        await rabbitMQ.close();
-    };
-
-    res.on('close', handleClientClose);
+    let consumer;
+    // When the client disconnects, cancel the consumer instead of closing the global connection.
+    req.on('close', async () => {
+        if (consumer) {
+            await rabbitMQ.cancelConsumer(consumer.consumerTag, consumer.channel);
+            console.log('Client disconnected, consumer canceled.');
+        }
+    });
 
     try {
-        await rabbitMQ.consume(
+        consumer = await rabbitMQ.createConsumer(
             QUEUE_NAME,
             (message) => {
-                if (!clientClosed) {
-                    res.write(`${JSON.stringify(message)}\n`);
-                }
+                res.write(`${JSON.stringify(message)}\n`);
+            },
+            {
+                autoAck: false,
+                prefetch: 10,
             }
         );
     } catch (err) {
@@ -48,36 +51,23 @@ router.get('/stream', async (req, res) => {
     }
 });
 
-
 // GET: Fetch a batch of messages without streaming
 router.get('/consume', async (req, res) => {
-    let messages = [];
-    let count = 0;
-
     try {
-        await rabbitMQ.consume(
-            QUEUE_NAME,
-            (message) => {
-                messages.push(JSON.stringify(message));
-                count++;
-            },
-            {
-                prefetch: 10,
-                autoAck: true,
-            }
-        );
-
+        const messages = await rabbitMQ.fetchMessages(QUEUE_NAME, 10, {
+            autoAck: false,
+        });
         res.status(200).json({
-            count: count,
-            messages: messages,
-        }).end();
+            count: messages.length,
+            messages,
+        });
     } catch (err) {
         console.error('Consume error:', err);
         res.status(500).json({ error: 'Failed to fetch messages' });
     }
 });
 
-// PATCH: Close RabbitMQ connection
+// PATCH: Close RabbitMQ connection (for maintenance/testing)
 router.patch('/close', async (req, res) => {
     try {
         await rabbitMQ.close();

@@ -1,63 +1,52 @@
-import { Event } from "@/lib/types";
-import axios from "axios";
-// import { env } from "@/lib/env";
+import { Event } from '@/lib/types';
+import { createApiClient } from '@/lib/clients/base-client';
 
-const createApiClient = (baseURL: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const apiClient = axios.create({
-    baseURL,
-    timeout: 10000,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  return {
-    events: {
-      stream: () => streamEvents(),
-    },
-  };
-
-  async function* streamEvents(): AsyncGenerator<Event, void, unknown> {
-    // const source = apiClient.CancelToken.source();
-    const streamClient = axios.create({
-      baseURL,
-      // timeout: 10000,
-      headers: {
-        // 'Content-Type': 'application/json',
-      },
-      // cancelToken: source.token,
-    });
-
-    try {
-      const response = await streamClient.get(`api/events/stream`, {
-        responseType: "stream",
-        // cancelToken: source.token,
+export const eventApi = {
+  stream: async function* streamEvents(cancellationSignal?: AbortSignal): AsyncGenerator<Event, void, unknown> {
+    let stream: ReadableStream;
+    if (typeof window !== 'undefined') {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_EVENT_API_URL}/api/events/stream`, {
+        headers: { Accept: 'application/x-ndjson' },
+        signal: cancellationSignal,
       });
-
-      const stream = response.data;
-
-      for await (const chunk of stream) {
-        try {
-          console.log(chunk);
-          const parsedChunk = JSON.parse(chunk.toString()) as Event;
-          console.log(parsedChunk);
-          yield parsedChunk;
-        } catch (parseError) {
-          console.error("Error parsing stream data:", parseError);
+      if (!response.body) throw new Error('ReadableStream não disponível neste navegador.');
+      stream = response.body;
+    } else {
+      const apiClient = createApiClient(process.env.NEXT_PUBLIC_EVENT_API_URL as string, { streaming: true });
+      const response = await apiClient.get('/api/events/stream', { signal: cancellationSignal });
+      stream = response.data;
+    }
+    const reader = stream.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        if (line.trim()) {
+          try {
+            yield JSON.parse(line) as Event;
+          } catch (err) {
+            console.error('Erro no parse:', err);
+          }
         }
       }
-    } catch (error) {
-      // if (apiClient.isCancel(error)) {
-      //   console.log("Stream canceled:", error.message);
-      // } else {
-      //   console.error("Streaming error:", error);
-      // }
-      console.error("Streaming error:", error);
-    } finally {
-      // source.cancel("Streaming canceled by client.");
     }
-  }
-};
+    if (buffer.trim()) {
+      try {
+        yield JSON.parse(buffer) as Event;
+      } catch (err) {
+        console.error('Erro no parse final:', err);
+      }
+    }
+  },
 
-export const eventApi = createApiClient(process.env.NEXT_PUBLIC_EVENT_API_URL || "");
+  create: async function createEvent(data: Omit<Event, 'id'>): Promise<Event> {
+    const apiClient = createApiClient(process.env.NEXT_PUBLIC_EVENT_API_URL as string);
+    const response = await apiClient.post('/api/events', data);
+    return response.data;
+  },
+};
