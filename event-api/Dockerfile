@@ -6,6 +6,9 @@ ENV NODE_ENV production
 ENV DOCKER true
 ENV PORT 8000
 
+ARG COMMIT_HASH
+ENV COMMIT_HASH=$COMMIT_HASH
+
 FROM base AS deps
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
