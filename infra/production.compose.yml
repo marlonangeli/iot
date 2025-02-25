@@ -48,8 +48,8 @@ services:
       SPRING_PROFILES_ACTIVE: production
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.logi-api.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/logi`)"
-      - "traefik.http.middlewares.logi-strip-prefix.stripprefix.prefixes=/logi"
+      - "traefik.http.routers.logi-api.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/logi/`)"
+      - "traefik.http.middlewares.logi-strip-prefix.stripprefix.prefixes=/logi/"
       - "traefik.http.routers.logi-api.middlewares=logi-strip-prefix"
       - "traefik.http.routers.logi-api.entrypoints=websecure"
       - "traefik.http.routers.logi-api.tls=true"
@@ -78,8 +78,8 @@ services:
       NEW_RELIC_APP_NAME: "event-api (prod)"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.event-api.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/event`)"
-      - "traefik.http.middlewares.event-strip-prefix.stripprefix.prefixes=/event"
+      - "traefik.http.routers.event-api.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/event/`)"
+      - "traefik.http.middlewares.event-strip-prefix.stripprefix.prefixes=/event/"
       - "traefik.http.routers.event-api.middlewares=event-strip-prefix"
       - "traefik.http.routers.event-api.entrypoints=websecure"
       - "traefik.http.routers.event-api.tls=true"
@@ -106,8 +106,8 @@ services:
       PORT: ${AUTH_PORT}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.auth.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/auth`)"
-      - "traefik.http.middlewares.auth-strip-prefix.stripprefix.prefixes=/auth"
+      - "traefik.http.routers.auth.rule=Host(`iot.marlonangeli.com.br`) && PathPrefix(`/auth/`)"
+      - "traefik.http.middlewares.auth-strip-prefix.stripprefix.prefixes=/auth/"
       - "traefik.http.routers.auth.middlewares=auth-strip-prefix"
       - "traefik.http.routers.auth.entrypoints=websecure"
       - "traefik.http.routers.auth.tls=true"
