@@ -121,7 +121,7 @@ export default function DeviceManagementPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Adicionar novo dispositivp</DialogTitle>
+            <DialogTitle>Adicionar novo dispositivo</DialogTitle>
             <DialogDescription>Digite as informações do novo dispositivo.</DialogDescription>
           </DialogHeader>
           <DeviceForm

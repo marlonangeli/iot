@@ -1,4 +1,3 @@
-import axios, { AxiosError, AxiosInstance } from "axios";
 import {
   Device,
   DeviceSchema,
@@ -13,98 +12,14 @@ import {
   Vehicle,
   VehicleSchema,
 } from "@/lib/types";
-// import { env } from "@/lib/env";
 import { CreateVehicle, CreateVehicleSchema } from "@/lib/clients/logi.types";
+import {createApiClient, handleApiError} from "@/lib/clients/base-client";
+import {AxiosError} from "axios";
 
-interface ProblemDetail {
-  type: string;
-  title: string;
-  status: number;
-  detail?: string;
-  instance?: string;
-}
-
-interface ValidationError {
-  status: string;
-  message: string;
-  timestamp: string;
-  errors: Record<string, string>;
-}
-
-class ApiError extends Error {
-  public readonly isApiError = true;
-  public readonly status?: number;
-  public readonly errors?: Record<string, string>;
-
-  constructor(message: string, status?: number, errors?: Record<string, string>) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.errors = errors;
-  }
-
-  hasValidationError(field?: string): boolean {
-    if (!this.errors) return false;
-    return field ? !!this.errors[field] : Object.keys(this.errors).length > 0;
-  }
-}
-
-function handleApiError(error: AxiosError): never {
-  if (error.response?.data && (error.response.data as ProblemDetail).status) {
-    const problemDetail = error.response.data as ProblemDetail;
-    throw new ApiError(
-      problemDetail.title,
-      problemDetail.status,
-      problemDetail.detail ? { detail: problemDetail.detail } : undefined
-    );
-  }
-
-  if (error.response?.data && (error.response.data as ValidationError).errors) {
-    const validationError = error.response.data as ValidationError;
-    throw new ApiError(validationError.message, 400, validationError.errors);
-  }
-
-  throw new ApiError(error.message, error.response?.status);
-}
-
-interface StatusVersion {
-  status: "OK" | "ERROR";
-  version: string | null;
-}
-
-interface StatusResponse {
-  status: "OK" | "WARNING";
-  database: StatusVersion;
-  messageBroker: StatusVersion;
-  commitHash: string;
-  apiVersion: string;
-}
-
-export const createApiClient = (baseURL: string) => {
-  const apiClient: AxiosInstance = axios.create({
-    baseURL,
-    timeout: 10000,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+export const ApiClient = () => {
+  const apiClient = createApiClient(process.env.NEXT_PUBLIC_LOGI_API_URL as string);
 
   return {
-    status: {
-      /**
-       * Get system status and versions
-       * @returns System status details
-       */
-      get: async (): Promise<StatusResponse> => {
-        try {
-          const response = await apiClient.get("/api/status");
-          return response.data as StatusResponse;
-        } catch (error) {
-          return handleApiError(error as AxiosError);
-        }
-      },
-    },
-
     devices: {
       /**
        * List devices with pagination
@@ -487,4 +402,4 @@ export const createApiClient = (baseURL: string) => {
   };
 };
 
-export const logiApi = createApiClient(process.env.NEXT_PUBLIC_LOGI_API_URL || "");
+export const logiApi = ApiClient();

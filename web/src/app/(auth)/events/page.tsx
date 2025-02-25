@@ -1,93 +1,116 @@
 'use client'
 
-import {useEffect, useState} from 'react'
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
-import {Input} from "@/components/ui/input"
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
+import {useRef, useState} from 'react';
+import {EventTable} from '@/components/event/event-table';
+import {EventFilter} from '@/components/event/event-filter';
+import {CreateEventModal} from '@/components/event/create-event-modal';
+import {eventApi} from '@/lib/clients/event.api';
+import {EventData} from '@/components/event/event-form';
+import {toast} from '@/hooks/use-toast';
+import {CanceledError} from "axios";
 
-// Dados simulados de eventos
-function gerarEvento(): Evento {
-  return {
-    id: Math.random().toString(36).substr(2, 9),
-    tipo: ['informação', 'aviso', 'erro'][Math.floor(Math.random() * 3)],
-    dispositivoId: `Dispositivo-${Math.floor(Math.random() * 100)}`,
-    mensagem: `Mensagem do evento ${Math.floor(Math.random() * 1000)}`,
-    timestamp: new Date().toISOString(),
-  } as Evento
-}
+export type Event = EventData;
 
-interface Evento {
-  id: string
-  tipo: 'informação' | 'aviso' | 'erro'
-  dispositivoId: string
-  mensagem: string
-  timestamp: string
-}
+export default function EventsPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
 
-export default function PaginaDeEventos() {
-  const [eventos, setEventos] = useState([] as Evento[])
-  const [termoDeBusca, setTermoDeBusca] = useState('')
-  const [tipoDeFiltro, setTipoDeFiltro] = useState('')
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    // Simula streaming de eventos em tempo real
-    const intervalo = setInterval(() => {
-      setEventos(eventosAnteriores => [gerarEvento(), ...eventosAnteriores.slice(0, 99)])
-    }, 5000)
+  const startStreaming = async () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
-    return () => clearInterval(intervalo)
-  }, [])
+    setIsStreaming(true);
+    try {
+      for await (const event of eventApi.stream(abortController.signal)) {
+        console.log("Event from API", event);
+        setEvents(prev => [event, ...prev.slice(0, 99)]);
+      }
+    } catch (err: unknown) {
+      if (err instanceof CanceledError) {
+        return; // just canceled, no need to show error
+      } else {
+        toast({
+          title: 'Erro ao receber eventos',
+          variant: 'destructive',
+        })
+        console.error('Erro ao receber eventos:', err);
+      }
+    } finally {
+      setIsStreaming(false);
+      abortControllerRef.current = null;
+    }
+  };
 
-  const eventosFiltrados = eventos.filter(evento =>
-    (evento.dispositivoId.toLowerCase().includes(termoDeBusca.toLowerCase()) ||
-      evento.mensagem.toLowerCase().includes(termoDeBusca.toLowerCase())) &&
-    (tipoDeFiltro === '' || evento.tipo === tipoDeFiltro)
-  )
+  const stopStreaming = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsStreaming(false);
+  };
+
+  const filteredEvents = events.filter(event =>
+    (searchTerm === '' ||
+      event.type.name.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (filterType === '' || event.type.name === filterType)
+  );
+
+  const handleCreateEvent = async (data: Event) => {
+    try {
+      await eventApi.create(data);
+      toast({
+        title: 'Evento criado com sucesso!',
+        variant: 'default',
+      });
+    } catch (err) {
+      toast({
+        title: 'Erro ao criar o evento',
+        variant: 'destructive',
+      });
+      console.error('Erro ao criar o evento:', err);
+    }
+  };
 
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Streaming de Eventos em Tempo Real</h1>
 
-      <div className="flex space-x-2">
-        <Input
-          placeholder="Pesquisar eventos..."
-          value={termoDeBusca}
-          onChange={(e) => setTermoDeBusca(e.target.value)}
-          className="max-w-sm"
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <EventFilter
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          filterType={filterType}
+          setFilterType={setFilterType}
         />
-        <Select value={tipoDeFiltro} onValueChange={setTipoDeFiltro}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filtrar por tipo"/>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os tipos</SelectItem>
-            <SelectItem value="informação">Informação</SelectItem>
-            <SelectItem value="aviso">Aviso</SelectItem>
-            <SelectItem value="erro">Erro</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex space-x-2">
+          {!isStreaming && (
+            <button
+              onClick={startStreaming}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Iniciar Streaming
+            </button>
+          )}
+          {isStreaming && (
+            <button
+              onClick={stopStreaming}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Parar Streaming
+            </button>
+          )}
+        </div>
+        <CreateEventModal onEventCreated={handleCreateEvent}/>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Tipo</TableHead>
-            <TableHead>ID do Dispositivo</TableHead>
-            <TableHead>Mensagem</TableHead>
-            <TableHead>Data/Hora</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {eventosFiltrados.map((evento) => (
-            <TableRow key={evento.id}>
-              <TableCell>{evento.tipo}</TableCell>
-              <TableCell>{evento.dispositivoId}</TableCell>
-              <TableCell>{evento.mensagem}</TableCell>
-              <TableCell>{new Date(evento.timestamp).toLocaleString()}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <EventTable events={filteredEvents}/>
     </div>
-  )
+  );
 }
